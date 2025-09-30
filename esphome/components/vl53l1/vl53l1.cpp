@@ -5,7 +5,7 @@
 extern "C" {
 #include "vendor/VL53L1-ULD-ESP/core/VL53L1X_api.h"
 }
-#include "vl53l1_platform_esphome.cpp"
+#include "vl53l1_platform_esphome.h"
 
 namespace esphome {
 namespace vl53l1 {

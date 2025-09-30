@@ -1,9 +1,10 @@
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 #include "esphome/components/i2c/i2c.h"
+#include "vl53l1_platform_esphome.h"
 
 extern "C" {
-#include "vendor/VL53L1-ULD-ESP/core/VL53L1X_api.h"
+#include "VL53L1-ULD-ESP/core/VL53L1X_api.h"
 }
 
 namespace {
