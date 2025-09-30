@@ -8,7 +8,7 @@
 namespace esphome {
 namespace vl53l1 {
 
-enum class DistanceMode : uint8_t { SHORT = 0, MEDIUM = 1, LONG = 2 };
+enum DistanceMode : uint8_t { SHORT = 0, LONG = 2 };
 
 class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c::I2CDevice {
  public:
