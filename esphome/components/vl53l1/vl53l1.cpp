@@ -27,7 +27,7 @@ void VL53L1Sensor::setup() {
   }
 
   // Bridge I2C for vendor API
-  esphome::vl53l1_platform_bridge::set_current_device(this);
+  set_current_device(this);
 
   this->initialized_ = this->init_sensor_();
   if (!this->initialized_) {
