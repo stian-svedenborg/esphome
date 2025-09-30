@@ -12,6 +12,7 @@
   */
 
   #include "vl53l1_platform.h"
+  #include "VL53L1X_api.h"
   #include "esphome/core/hal.h"
   #include "esphome/core/log.h"
   #include "esphome/components/i2c/i2c.h"
@@ -22,12 +23,12 @@
     namespace vl53l1 {
       static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
       
-      void register_sensor(I2CDevice* dev) {
+      void register_sensor(::esphome::i2c::I2CDevice* dev) {
         devices[dev->get_i2c_address()] = dev;
       }
       
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
-        return devices.get(devAddr, nullptr);
+        return devices.at(devAddr);
       }
 
     int8_t VL53L1_WriteMulti( uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) {
