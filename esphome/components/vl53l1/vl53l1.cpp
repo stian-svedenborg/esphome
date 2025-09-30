@@ -20,6 +20,7 @@ static const char *const TAG = "vl53l1";
 
 
 void VL53L1Sensor::setup() {
+    ESP_LOGE(TAG, "  Starting setup!");
   ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
   if (this->enable_pin_ != nullptr) {
     this->enable_pin_->setup();
