@@ -68,13 +68,14 @@
   }
   
   int8_t VL53L1_RdByte(uint16_t dev, uint16_t index, uint8_t *data) {
+    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(&data), sizeof(*data));
     uint8_t status = VL53L1X_ERROR_TIMEOUT;
 
     if(lookup(dev)->read_byte(index, data)) {
       status = VL53L1X_ERROR_NONE;
     }
     
-    ESP_LOGD("platform", "READ byte: %x", data);
+    ESP_LOGD("platform", "READ byte: %x", *data);
     
     return status;
   }
