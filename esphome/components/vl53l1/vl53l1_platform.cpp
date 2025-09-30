@@ -3,9 +3,9 @@
 #include "esphome/components/i2c/i2c.h"
 #include "vl53l1_platform.h"
 
-{
+
 #include "VL53L1X_api.h"
-}
+
 
 namespace esphome {
 namespace vl53l1 {
