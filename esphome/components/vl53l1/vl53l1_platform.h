@@ -1,9 +1,9 @@
 #pragma once
 
-#include "esphome/components/i2c/i2c.h"
-
 #ifdef __cplusplus
 
+
+#include "esphome/components/i2c/i2c.h"
 
 namespace esphome {
 namespace vl53l1_platform_bridge {
