@@ -20,7 +20,7 @@ static const char *const TAG = "vl53l1";
 
 
 void VL53L1Sensor::setup() {
-    ESP_LOGE(TAG, "  Starting setup!");
+  ESP_LOGE(TAG, "  Starting setup!");
   ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
   if (this->enable_pin_ != nullptr) {
     this->enable_pin_->setup();
@@ -48,9 +48,12 @@ void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "  Timeout: %u us", (unsigned) this->timeout_us_);
   ESP_LOGCONFIG(TAG, "  Timing Budget: %u us", (unsigned) this->measurement_timing_budget_us_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
- // if (this->is_failed()) {
-  //  ESP_LOGE(TAG, "  Communication failed!");
-  //}
+  if (this->enable_pin_ != nullptr) {
+    LOG_PIN("  Enable Pin: ", this->enable_pin_);
+  }
+  if (this->is_failed()) {
+    ESP_LOGE(TAG, "  Communication failed!");
+  }
 }
 
 void VL53L1Sensor::update() {
