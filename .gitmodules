@@ -1,0 +1,3 @@
+[submodule "esphome/components/vl53l1/vendor/VL53L1-ULD-ESP"]
+	path = esphome/components/vl53l1/vendor/VL53L1-ULD-ESP
+	url = https://github.com/david-asher/VL53L1-ULD-ESP

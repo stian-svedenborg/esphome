@@ -2,6 +2,11 @@
 
 #include "esphome/core/log.h"
 
+extern "C" {
+#include "vendor/VL53L1-ULD-ESP/core/VL53L1X_api.h"
+}
+#include "vl53l1_platform_esphome.cpp"
+
 namespace esphome {
 namespace vl53l1 {
 
@@ -13,6 +18,9 @@ void VL53L1Sensor::setup() {
     this->enable_pin_->setup();
     this->enable_pin_->digital_write(true);
   }
+
+  // Bridge I2C for vendor API
+  esphome::vl53l1_platform_bridge::set_current_device(this);
 
   this->initialized_ = this->init_sensor_();
   if (!this->initialized_) {
@@ -55,32 +63,69 @@ void VL53L1Sensor::update() {
   this->publish_state(distance_m);
 }
 
-// The following methods are minimal placeholders to allow component scaffolding.
-// They should be replaced with proper VL53L1 ULD register setup, taken from
-// the VL53L1-ULD-ESP reference implementation.
+// No low-level helpers needed; vendor API used instead
 
 bool VL53L1Sensor::init_sensor_() {
-  // Basic check: try reading a known register if available. For now, just return true.
-  // Proper implementation should reset sensor, boot state, load default config.
+  // Use vendor ULD to initialize
+  uint8_t boot = 0;
+  const uint32_t start_us = micros();
+  while ((micros() - start_us) < 1000000) {
+    if (VL53L1X_BootState(this->address_, &boot) == 0 && boot) break;
+    delay(2);
+  }
+  if (!boot) {
+    ESP_LOGE(TAG, "Boot not completed");
+    return false;
+  }
+
+  if (VL53L1X_SensorInit(this->address_) != 0) {
+    ESP_LOGE(TAG, "SensorInit failed");
+    return false;
+  }
   return true;
 }
 
 bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
-  // Placeholder: return dummy value to ensure end-to-end plumbing works
-  distance_mm = 0;
-  // TODO: Implement single ranging using ULD sequences and I2C transactions
-  return false;
+  if (VL53L1X_StartRanging(this->address_) != 0) {
+    ESP_LOGW(TAG, "StartRanging failed");
+    return false;
+  }
+
+  const uint32_t start_us = micros();
+  uint8_t ready = 0;
+  while ((micros() - start_us) < this->timeout_us_) {
+    if (VL53L1X_CheckForDataReady(this->address_, &ready) == 0 && ready) break;
+    delay(1);
+  }
+  if (!ready) {
+    VL53L1X_StopRanging(this->address_);
+    ESP_LOGW(TAG, "Data not ready within timeout");
+    return false;
+  }
+
+  if (VL53L1X_GetDistance(this->address_, &distance_mm) != 0) {
+    VL53L1X_StopRanging(this->address_);
+    ESP_LOGW(TAG, "GetDistance failed");
+    return false;
+  }
+
+  VL53L1X_ClearInterrupt(this->address_);
+  VL53L1X_StopRanging(this->address_);
+  return true;
 }
 
 bool VL53L1Sensor::set_distance_mode_(DistanceMode mode) {
-  // TODO: Configure sensor distance mode via ULD sequences
-  (void) mode;
+  this->distance_mode_ = mode;
+  uint16_t vendor_mode = (mode == DistanceMode::SHORT) ? 1 : 2;  // ULD supports short/long
+  if (VL53L1X_SetDistanceMode(this->address_, vendor_mode) != 0) return false;
   return true;
 }
 
 bool VL53L1Sensor::set_timing_budget_(uint32_t timing_budget_us) {
-  // TODO: Apply timing budget via ULD sequences
-  (void) timing_budget_us;
+  this->measurement_timing_budget_us_ = timing_budget_us;
+  uint16_t ms = static_cast<uint16_t>((timing_budget_us + 500) / 1000);
+  if (ms == 0) ms = 1;
+  if (VL53L1X_SetTimingBudgetInMs(this->address_, ms) != 0) return false;
   return true;
 }
 
