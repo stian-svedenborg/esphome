@@ -17,29 +17,6 @@
  
  #ifndef _VL53L1_PLATFORM_H_
  #define _VL53L1_PLATFORM_H_
-
-namespace esphome {
-namespace vl53l1 {
-    
-/**
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-  
-/**
- * @file  vl53l1_platform.h
- * @brief Those platform functions are platform dependent and have to be implemented by the user
- */
- 
- #ifndef _VL53L1_PLATFORM_H_
- #define _VL53L1_PLATFORM_H_
  
  #include "vl53l1_types.h"
  
