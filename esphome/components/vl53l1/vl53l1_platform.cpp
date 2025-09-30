@@ -68,24 +68,15 @@
   }
   
   int8_t VL53L1_RdByte(uint16_t dev, uint16_t index, uint8_t *data) {
-    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(&data), sizeof(*data));
-    uint8_t status = VL53L1X_ERROR_TIMEOUT;
-
-    if(lookup(dev)->read_byte(index, data)) {
-      status = VL53L1X_ERROR_NONE;
-    }
-    
-    ESP_LOGD("platform", "READ byte: %x", *data);
-    
-    return status;
+    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(data), sizeof(*data));
   }
   
   int8_t VL53L1_RdWord(uint16_t dev, uint16_t index, uint16_t *data) {
-    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(&data), sizeof(*data));
+    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(data), sizeof(*data));
   }
   
   int8_t VL53L1_RdDWord(uint16_t dev, uint16_t index, uint32_t *data) {
-    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(&data), sizeof(*data));
+    return VL53L1_ReadMulti(dev, index, reinterpret_cast<uint8_t*>(data), sizeof(*data));
   }
   
   int8_t VL53L1_WaitMs(uint16_t dev, int32_t wait_ms){
