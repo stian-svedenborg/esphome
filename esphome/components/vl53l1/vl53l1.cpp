@@ -78,10 +78,11 @@ bool VL53L1Sensor::init_sensor_() {
   uint8_t boot = 0;
   uint8_t err = 0;
   const uint32_t start_us = micros();
-  while ((micros() - start_us) < 1000000) {
+  while ((micros() - start_us) < 10000000) {
     if ((err = VL53L1X_BootState(this->address_, &boot)) == 0 && boot) break;
     delay(2);
   }
+  
   if (!boot) {
     ESP_LOGE(TAG, "Boot not completed: %d", err);
     return false;
