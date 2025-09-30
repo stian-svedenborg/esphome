@@ -46,12 +46,15 @@
   int8_t VL53L1_ReadMulti(uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count){
       uint8_t status = VL53L1X_ERROR_TIMEOUT;
 
+      
+
       if(lookup(dev)->read_register16(index, pdata, count)) {
         status = VL53L1X_ERROR_NONE;
       }
       
       ESP_LOGD("platform", "(%d) READ %d bytes: %s", status, count, esphome::format_hex(pdata, count).c_str());
       
+      return 0;
       return status;
   }
   
