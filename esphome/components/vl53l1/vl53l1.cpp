@@ -76,6 +76,7 @@ bool VL53L1Sensor::init_sensor_() {
   const uint32_t start_us = micros();
   while ((micros() - start_us) < 1000000) {
     if ((err = VL53L1X_BootState(this->address_, &boot)) == 0 && boot) break;
+    ESP_LOGD(TAG, "BootState: %d", boot)
     delay(2);
   }
   
