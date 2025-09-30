@@ -74,7 +74,7 @@ extern "C" int8_t VL53L1_RdDWord(uint16_t dev, uint16_t index, uint32_t *pdata) 
 
 extern "C" int8_t VL53L1_WaitMs(uint16_t dev, int32_t wait_ms) {
   (void) dev;
-  delay(wait_ms);
+  esphome::delay(wait_ms);
   return 0;
 }
 
