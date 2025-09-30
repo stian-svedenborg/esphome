@@ -13,7 +13,7 @@ from esphome.const import (
 )
 
 DEPENDENCIES = ["i2c"]
-CODEOWNERS = ["@your-username"]
+CODEOWNERS = ["@stian-svedenborg"]
 
 vl53l1_ns = cg.esphome_ns.namespace("vl53l1")
 VL53L1Sensor = vl53l1_ns.class_(
@@ -26,7 +26,6 @@ CONF_DISTANCE_MODE = "distance_mode"
 DISTANCE_MODE_ENUM = vl53l1_ns.enum("DistanceMode")
 DISTANCE_MODE = {
     "short": DISTANCE_MODE_ENUM.SHORT,
-    "medium": DISTANCE_MODE_ENUM.MEDIUM,
     "long": DISTANCE_MODE_ENUM.LONG,
 }
 
