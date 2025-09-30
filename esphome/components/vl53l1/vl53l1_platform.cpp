@@ -35,7 +35,7 @@
     int8_t VL53L1_WriteMulti( uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) {
       uint8_t status = VL53L1X_ERROR_TIMEOUT; 
 
-      if(lookup(dev)->write_register_16(index, pdata, count)) {
+      if(lookup(dev)->write_register16(index, pdata, count)) {
         status = VL53L1X_ERROR_NONE;
       }
       ESP_LOGD("platform", "WROTE %d bytes: %s", count, esphome::format_hex(pdata, count).c_str());
@@ -46,7 +46,7 @@
   int8_t VL53L1_ReadMulti(uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count){
       uint8_t status = VL53L1X_ERROR_TIMEOUT;
 
-      if(lookup(dev)->read_register_16(index, pdata, count)) {
+      if(lookup(dev)->read_register16(index, pdata, count)) {
         status = VL53L1X_ERROR_NONE;
       }
       
