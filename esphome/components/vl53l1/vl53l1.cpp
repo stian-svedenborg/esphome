@@ -99,7 +99,6 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
 
   const uint32_t start_us = micros();
   uint8_t ready = 0;
-  int8_t err = 0;
   while ((micros() - start_us) < this->timeout_us_) {
     if ((err = VL53L1X_CheckForDataReady(this->address_, &ready)) == 0 && ready) break;
     delay(1);
