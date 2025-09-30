@@ -16,6 +16,7 @@ void set_current_device(esphome::i2c::I2CDevice *dev);
 
 }  // namespace esphome
 
+#include <stdint.h>
 
 extern "C" {
 #endif
