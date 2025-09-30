@@ -38,7 +38,7 @@
       if(lookup(dev)->write_bytes(index, pdata, count)) {
         status = VL53L1X_ERROR_NONE;
       }
-      ESP_LOGD("platform", "WROTE %d bytes: %s", len, esphome::format_hex(pdata, count).c_str());
+      ESP_LOGD("platform", "WROTE %d bytes: %s", count, esphome::format_hex(pdata, count).c_str());
       
       return status;
     }
@@ -50,7 +50,7 @@
         status = VL53L1X_ERROR_NONE;
       }
       
-      ESP_LOGD("platform", "READ %d bytes: %s", len, esphome::format_hex(pdata, count).c_str());
+      ESP_LOGD("platform", "READ %d bytes: %s", count, esphome::format_hex(pdata, count).c_str());
       
       return status;
   }
