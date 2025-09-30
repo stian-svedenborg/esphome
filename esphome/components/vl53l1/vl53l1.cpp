@@ -12,11 +12,7 @@ namespace vl53l1 {
 
 using namespace st_vl53l1x_uld;
 
-// Set the current I2C device instance for the vendor VL53L1 ULD C API bridge
-void set_current_device(esphome::i2c::I2CDevice *dev);
-
 static const char *const TAG = "vl53l1";
-
 
 
 void VL53L1Sensor::setup() {
@@ -28,7 +24,7 @@ void VL53L1Sensor::setup() {
   }
 
   // Bridge I2C for vendor API
-  set_current_device(this);
+  register_sensor(this);
 
   this->initialized_ = this->init_sensor_();
   if (!this->initialized_) {
@@ -78,7 +74,7 @@ bool VL53L1Sensor::init_sensor_() {
   uint8_t boot = 0;
   uint8_t err = 0;
   const uint32_t start_us = micros();
-  while ((micros() - start_us) < 10000000) {
+  while ((micros() - start_us) < 1000000) {
     if ((err = VL53L1X_BootState(this->address_, &boot)) == 0 && boot) break;
     delay(2);
   }
