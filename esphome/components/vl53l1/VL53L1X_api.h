@@ -20,6 +20,10 @@
 
 #include "vl53l1_platform.h"
 
+namespace esphome {
+namespace vl53l1 {
+namespace st_vl53l1x_uld {
+
 #define VL53L1X_IMPLEMENTATION_VER_MAJOR       3
 #define VL53L1X_IMPLEMENTATION_VER_MINOR       5
 #define VL53L1X_IMPLEMENTATION_VER_SUB         5
@@ -345,4 +349,10 @@ VL53L1X_ERROR VL53L1X_GetSigmaThreshold(uint16_t dev, uint16_t *signal);
  */
 VL53L1X_ERROR VL53L1X_StartTemperatureUpdate(uint16_t dev);
 
+
+} // namespace st_vl53l1x_uld
+} // namespace vl53l1
+} // namespace esphome
+
 #endif
+
