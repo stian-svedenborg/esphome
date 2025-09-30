@@ -110,6 +110,16 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
     ESP_LOGW(TAG, "Data not ready within timeout: %d", err);
     return false;
   }
+  
+  if ((err = VL53L1X_GetRangeStatus(this->address_, &distance_mm)) != 0) {
+    VL53L1X_StopRanging(this->address_);
+    ESP_LOGW(TAG, "GetDistance failed: %d", err);
+    return false;
+  }
+
+  uint8_t rangeStatus = 0
+  VL53L1X_GetRangeStatus(this->address_, &rangeStatus);
+  ESP_LOGD(TAG, "GetRangeStatus: %d", rangeStatus);
 
   if ((err = VL53L1X_GetDistance(this->address_, &distance_mm)) != 0) {
     VL53L1X_StopRanging(this->address_);
