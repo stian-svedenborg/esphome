@@ -19,7 +19,7 @@ static const char *const TAG = "vl53l1";
 
 
 
-void VL53L1Sensor::setup() override {
+void VL53L1Sensor::setup() {
   ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
   if (this->enable_pin_ != nullptr) {
     this->enable_pin_->setup();
