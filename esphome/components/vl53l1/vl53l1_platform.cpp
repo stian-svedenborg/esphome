@@ -16,14 +16,12 @@
   #include "esphome/core/log.h"
   #include "esphome/components/i2c/i2c.h"
   
-  #include <string.h>
-  #include <time.h>
-  #include <math.h>
+  #include <map>
 
   namespace esphome {
     namespace vl53l1 {
       static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
-      void register_i2c_device(I2CDevice* dev) {
+      void register_sensor(I2CDevice* dev) {
         devices[dev->get_i2c_address()] = dev;
       }
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
