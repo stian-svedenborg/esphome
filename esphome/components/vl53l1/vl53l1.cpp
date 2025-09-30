@@ -3,7 +3,7 @@
 #include "esphome/core/log.h"
 
 extern "C" {
-#include "vendor/VL53L1-ULD-ESP/core/VL53L1X_api.h"
+#include "VL53L1-ULD-ESP/core/VL53L1X_api.h"
 }
 #include "vl53l1_platform_esphome.h"
 
