@@ -21,9 +21,11 @@
   namespace esphome {
     namespace vl53l1 {
       static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
+      
       void register_sensor(I2CDevice* dev) {
         devices[dev->get_i2c_address()] = dev;
       }
+      
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
         return devices.get(devAddr, nullptr);
       }
