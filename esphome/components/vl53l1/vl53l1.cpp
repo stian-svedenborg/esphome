@@ -112,7 +112,7 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
   }
   
 
-  uint8_t rangeStatus = 0
+  uint8_t rangeStatus = 0;
   VL53L1X_GetRangeStatus(this->address_, &rangeStatus);
   ESP_LOGD(TAG, "GetRangeStatus: %d", rangeStatus);
 
