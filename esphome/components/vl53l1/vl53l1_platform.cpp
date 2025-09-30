@@ -32,7 +32,7 @@
       }
 
     int8_t VL53L1_WriteMulti( uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) {
-      uint8_t status = VL53L1X_ERROR_TIMEOUT;
+      uint8_t status = VL53L1X_ERROR_TIMEOUT; 
 
       if(lookup(dev)->write_bytes(index, pdata, count)) {
         status = VL53L1X_ERROR_NONE;
