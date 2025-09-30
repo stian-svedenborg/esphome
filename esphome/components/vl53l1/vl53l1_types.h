@@ -99,7 +99,8 @@ typedef signed char int8_t;
  * Given a floating point value f it's .16 bit point is (int)(f*(1<<16))*/
 typedef uint32_t FixPoint1616_t;
 
-#endif /* VL53L1_TYPES_H_ */
 
-  }
 }
+}
+
+#endif /* VL53L1_TYPES_H_ */
