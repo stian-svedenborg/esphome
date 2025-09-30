@@ -21,6 +21,12 @@ class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c:
   void set_timing_budget(uint32_t timing_budget) { this->measurement_timing_budget_us_ = timing_budget; }
   void set_distance_mode(DistanceMode mode) { this->distance_mode_ = mode; }
 
+  float get_setup_priority() const {
+    // Return the setup priority of this component
+    // Higher values mean this component will be set up later
+    return setup_priority::DATA;
+  }
+
  protected:
   bool init_sensor_();
   bool read_distance_mm_(uint16_t &distance_mm);
