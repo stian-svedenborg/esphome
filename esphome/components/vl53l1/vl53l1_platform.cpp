@@ -77,6 +77,7 @@
   
   int8_t VL53L1_WaitMs(uint16_t dev, int32_t wait_ms){
       ::esphome::delay(wait_ms);
+      return VL53L1X_ERROR_NONE;
   }
   
 
