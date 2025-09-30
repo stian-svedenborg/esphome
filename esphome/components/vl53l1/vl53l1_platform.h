@@ -23,7 +23,7 @@
 namespace esphome {
 namespace vl53l1 {
  
- void register_sensor(I2CDevice* dev)
+
 
  typedef struct {
      uint32_t dummy;
