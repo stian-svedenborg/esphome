@@ -127,6 +127,8 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
     return false;
   }
 
+  ESP_LOGD(TAG, "read_distance_mm successfull/n  rangeStatus: %d/n  distance_mm: %d", rangeStatus, distance_mm);
+
   VL53L1X_ClearInterrupt(this->address_);
   VL53L1X_StopRanging(this->address_);
   return true;
