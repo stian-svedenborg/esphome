@@ -5,7 +5,14 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/i2c/i2c.h"
 
+
+
+
 namespace esphome {
+namespace i2c {
+    class I2CDevice;
+}
+
 namespace vl53l1 {
 
     void register_sensor(I2CDevice* dev);
