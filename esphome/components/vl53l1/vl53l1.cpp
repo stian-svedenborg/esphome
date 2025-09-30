@@ -48,9 +48,9 @@ void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "  Timeout: %u us", (unsigned) this->timeout_us_);
   ESP_LOGCONFIG(TAG, "  Timing Budget: %u us", (unsigned) this->measurement_timing_budget_us_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
-  if (this->is_failed()) {
-    ESP_LOGE(TAG, "  Communication failed!");
-  }
+ // if (this->is_failed()) {
+  //  ESP_LOGE(TAG, "  Communication failed!");
+  //}
 }
 
 void VL53L1Sensor::update() {
