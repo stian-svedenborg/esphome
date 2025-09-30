@@ -74,7 +74,7 @@
       status = VL53L1X_ERROR_NONE;
     }
     
-    ESP_LOGD("platform", "READ byte: %s", count, esphome::format_hex(data, count).c_str());
+    ESP_LOGD("platform", "READ byte: %x", data);
     
     return status;
   }
