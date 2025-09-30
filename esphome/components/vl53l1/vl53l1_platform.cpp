@@ -32,20 +32,20 @@
       }
 
     int8_t VL53L1_WriteMulti( uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) {
-      uint8_t status = st_vl53l1x_uld::VL53L1X_ERROR;
+      uint8_t status = VL53L1X_ERROR_TIMEOUT;
 
       if(lookup(dev)->write_bytes(index, pdata, count)) {
-        status = st_vl53l1x_uld::VL53L1X_ERROR_NONE;
+        status = VL53L1X_ERROR_NONE;
       }
       
       return status;
     }
   
   int8_t VL53L1_ReadMulti(uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count){
-      uint8_t status = st_vl53l1x_uld::VL53L1X_ERROR;
+      uint8_t status = VL53L1X_ERROR_TIMEOUT;
 
       if(lookup(dev)->read_bytes(index, pdata, count)) {
-        status = st_vl53l1x_uld::VL53L1X_ERROR_NONE;
+        status = VL53L1X_ERROR_NONE;
       }
       
       return status;
