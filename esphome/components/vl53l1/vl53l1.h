@@ -9,13 +9,9 @@
 
 
 namespace esphome {
-namespace i2c {
-    class I2CDevice;
-}
-
 namespace vl53l1 {
 
-    void register_sensor(I2CDevice* dev);
+    void register_sensor(::esphome::i2c::I2CDevice* dev);
 
 enum DistanceMode : uint8_t { SHORT = 0, LONG = 2 };
 
