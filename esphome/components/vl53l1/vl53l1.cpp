@@ -5,7 +5,7 @@
 extern "C" {
 #include "VL53L1X_api.h"
 }
-#include "vl53l1_platform_esphome.h"
+#include "vl53l1_platform.h" 
 
 namespace esphome {
 namespace vl53l1 {
