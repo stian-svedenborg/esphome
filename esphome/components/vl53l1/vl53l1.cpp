@@ -26,7 +26,7 @@ void VL53L1Sensor::setup() {
   register_sensor(this); // Bridge I2C for vendor API
   ESP_LOGD(TAG, "ADDRESS: %x", this->address_);
   // The first address argument is used to hook the currently configured the I2CDevice in the platform bridge. 
-  if ((err = VL53L1X_SetI2CAddress(0x0000, this->address_ << 1)) != VL53L1X_ERROR_NONE) {
+  if ((err = VL53L1X_SetI2CAddress(0x29, this->address_ << 1)) != VL53L1X_ERROR_NONE) {
     ESP_LOGE(TAG, "SetI2CAddress failed: %d", err);
     this->mark_failed();
     return;
