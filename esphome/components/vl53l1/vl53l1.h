@@ -12,7 +12,6 @@ namespace esphome {
     class I2CBus;
   }
 namespace vl53l1 {
-
     void register_sensor(::esphome::i2c::I2CDevice* dev);
     void set_bootstrap_device(::esphome::i2c::I2CDevice* dev);
     void clear_bootstrap_device();

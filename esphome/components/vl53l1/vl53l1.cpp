@@ -12,8 +12,14 @@ namespace vl53l1 {
 using namespace st_vl53l1x_uld;
 
 static const char *const TAG = "vl53l1";
-constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29;
 
+// When using multiple VL53L1 sensors on the board, we require them to all
+// have different addresses, and if multiple boards are on the same bus, 
+// they all need the enable_pin set.
+// During setup we will disable all sensors, and bring them online
+// one after another as we are bringing them online and register the updated
+// I2C address with the sensor firmware.
+constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29; 
 bool VL53L1Sensor::pin_setup_complete = false;
 std::list<VL53L1Sensor*> VL53L1Sensor::all_sensors;
 
@@ -23,10 +29,8 @@ VL53L1Sensor::VL53L1Sensor() {
 
 void VL53L1Sensor::setup() {
   VL53L1X_ERROR err = 0;
-
-  ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
-
   if (!this->pin_setup_complete) {
+    ESP_LOGCONFIG(TAG, "Bootstrapping VL53L1x enable-pins...");
     // Disable all sensors that have enable_pins set.
     for (auto sensor : this->all_sensors) {
         sensor->enable_pin_setup();
@@ -34,9 +38,11 @@ void VL53L1Sensor::setup() {
     }
     this->pin_setup_complete = true;
   }
+  ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
+
   ::esphome::delay(2);
   
-  // Powercycle this sensor to reset address to DEFAULT_I2C_ADDRESS
+  // Powercycle this sensor to reset firmware address to DEFAULT_I2C_ADDRESS
   this->enable();
   ::esphome::delay(2);
   

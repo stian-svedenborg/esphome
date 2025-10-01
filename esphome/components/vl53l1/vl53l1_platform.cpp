@@ -11,6 +11,8 @@
   ******************************************************************************
   */
 
+  /** Platform Bridge functions used by the STMicroelectronics Ultra Light Driver */
+
   #include "vl53l1_platform.h"
   #include "VL53L1X_api.h"
   #include "esphome/core/hal.h"
@@ -22,24 +24,31 @@
 
   namespace esphome {
     namespace vl53l1 {
-
-      
-
-      static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
+      // Until the proper I2C-address is setup we use the bootstrap I2CDevice 
+      // for communication, this address is always 0x29.  
       static ::esphome::i2c::I2CDevice* bootstrap_device{nullptr};
-      
-      void register_sensor(::esphome::i2c::I2CDevice* dev) {
-          devices[dev->get_i2c_address()] = dev;
-      }
 
+      /** Set the bootstrap device, should be cleared afterwards. */
       void set_bootstrap_device(::esphome::i2c::I2CDevice* dev) {
         bootstrap_device = dev;
       }
       
+      /** Clears the bootstrap device. */
       void clear_bootstrap_device() {
         bootstrap_device = nullptr;
       }
 
+      // The ST-Electronic Ultra Light Driver only forwards the device address to differentiate 
+      // between devices, therefore we instantiate a map to the proper I2CDevice as part of setup. 
+      static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
+
+      /** Register the sensor I2CDevice so it is accessible to the driver. */
+      void register_sensor(::esphome::i2c::I2CDevice* dev) {
+          devices[dev->get_i2c_address()] = dev;
+      }
+
+      /** Return the I2CDevice associated with an address. If bootstrap-device is set, 
+       *  and address is 0x29, the bootstrap device is returned instead. */
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
         if (devAddr == 0x29 && bootstrap_device) {
           return bootstrap_device;
@@ -53,8 +62,6 @@
       if((err = lookup(dev)->write_register16(index, pdata, count)) == 0) {
         status = VL53L1X_ERROR_NONE;
       }
-      ESP_LOGD("platform", "(%d) WROTE %d bytes: %s", err, count, esphome::format_hex(pdata, count).c_str());
-      
       return status;
     }
   
@@ -64,9 +71,7 @@
       if((err = lookup(dev)->read_register16(index, pdata, count)) == 0) {
         status = VL53L1X_ERROR_NONE;
       }
-      
-      ESP_LOGD("platform", "(%d) READ %d bytes: %s", err, count, esphome::format_hex(pdata, count).c_str());
-      
+    
       return status;
   }
   
