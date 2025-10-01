@@ -26,6 +26,9 @@
       
       void register_sensor(::esphome::i2c::I2CDevice* dev) {
         devices[dev->get_i2c_address()] = dev;
+        if (dev->get_i2c_address() != 0x29){
+          devices[0xFFFFFF] = dev;
+        }
       }
       
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
