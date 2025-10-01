@@ -4,28 +4,28 @@
 #include "VL53L1X_api.h"
 
 
-
-
-
 namespace esphome {
 namespace vl53l1 {
 
 using namespace st_vl53l1x_uld;
 
 static const char *const TAG = "vl53l1";
+constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29;
 
 
 void VL53L1Sensor::setup() {
-  ESP_LOGE(TAG, "  Starting setup!");
+  VL53L1X_ERROR err = 0;
   ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
   if (this->enable_pin_ != nullptr) {
     this->enable_pin_->setup();
     this->enable_pin_->digital_write(true);
   }
 
-  // Bridge I2C for vendor API
-  register_sensor(this);
-
+  // Setup I2C Address
+  esphome::delay(3);
+  VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address());
+  register_sensor(this); // Bridge I2C for vendor API
+  
   this->initialized_ = this->init_sensor_();
   if (!this->initialized_) {
     this->mark_failed();
@@ -35,6 +35,13 @@ void VL53L1Sensor::setup() {
   // Apply configuration
   this->set_distance_mode_(this->distance_mode_);
   this->set_timing_budget_(this->measurement_timing_budget_us_);
+
+  // Enable measurements
+  uint8_t err = 0;
+  if ((err = VL53L1X_StartRanging(this->address_)) != 0) {
+    ESP_LOGW(TAG, "StartRanging failed: %d", err);
+    this->mark_failed();
+  }
 }
 
 void VL53L1Sensor::dump_config() {
@@ -72,11 +79,16 @@ void VL53L1Sensor::update() {
 
 bool VL53L1Sensor::init_sensor_() {
   uint8_t boot = 0;
-  uint8_t err = 0;
+  VL53L1X_ERROR err = 0;
+  const char * failing_call = "";
+
   const uint32_t start_us = micros();
-  while ((micros() - start_us) < 1000000) {
-    if ((err = VL53L1X_BootState(this->address_, &boot)) == 0 && boot) break;
-    ESP_LOGD(TAG, "BootState: %d", boot);
+  while ((micros() - start_us) < 200000) {
+    if ((err = VL53L1X_BootState(this->address_, &boot)) == VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "BootState failed %d", err);
+    } 
+    if (boot) break;
+    ESP_LOGVV(TAG, "BootState: %d", boot);
     delay(2);
   }
   
@@ -86,47 +98,72 @@ bool VL53L1Sensor::init_sensor_() {
   }
 
   if ((err = VL53L1X_SensorInit(this->address_)) != 0) {
-    ESP_LOGE(TAG, "SensorInit failed: %d", err);
-    return false;
+    failing_call = "SensorInit";
+    goto setup_error;
   }
+
+  if ((err = VL53L1X_StartTemperatureUpdate(this->address_)) != 0) {
+    failing_call = "StartTemperatureUpdate";
+    goto setup_error;
+  }
+
   return true;
+
+setup_error:
+  ESP_LOGE(TAG, "%s failed: %d", failing_call, err);
+  return false;
 }
 
 bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
+  const char* failing_call = "";
   uint8_t err = 0;
-  if ((err = VL53L1X_StartRanging(this->address_)) != 0) {
-    ESP_LOGW(TAG, "StartRanging failed: %d", err);
-    return false;
-  }
-
+  
   const uint32_t start_us = micros();
   uint8_t ready = 0;
+  uint8_t rangeStatus = 0;
+  uint16_t tmp_distance = 0;
+
   while ((micros() - start_us) < this->timeout_us_) {
-    if ((err = VL53L1X_CheckForDataReady(this->address_, &ready)) == 0 && ready) break;
-    delay(1);
+    if (err = VL53L1X_CheckForDataReady(this->address_, &ready) != VL53L1X_ERROR_NONE) {
+      failing_call = "CheckForDataReady";
+      goto read_distance_error;
+    }
+    if (ready) break;
+    delay(2);
   }
+
   if (!ready) {
-    VL53L1X_StopRanging(this->address_);
-    ESP_LOGW(TAG, "Data not ready within timeout: %d", err);
+    ESP_LOGW(TAG, "Data not ready within timeout");
     return false;
   }
   
-
-  uint8_t rangeStatus = 0;
-  VL53L1X_GetRangeStatus(this->address_, &rangeStatus);
-  ESP_LOGD(TAG, "GetRangeStatus: %d", rangeStatus);
-
-  if ((err = VL53L1X_GetDistance(this->address_, &distance_mm)) != 0) {
-    VL53L1X_StopRanging(this->address_);
-    ESP_LOGW(TAG, "GetDistance failed: %d", err);
-    return false;
+  if ((err = VL53L1X_GetRangeStatus(this->address_, &rangeStatus)) != VL53L1X_ERROR_NONE) {
+      failing_call = "GetRangeStatus";
+      goto read_distance_error;
+  }
+  switch(rangeStatus) {
+    case 0: break;
+    case 1:
+    case 2:
+      ESP_LOGW(TAG, "Range failure: %d", rangeStatus);
+      return false;
+    default:
+      ESP_LOGE(TAG, "Critical range failure: %d", rangeStatus);
+      return false;
+  }
+  
+  if ((err = VL53L1X_GetDistance(this->address_, &tmp_distance)) != VL53L1X_ERROR_NONE) {
+    failing_call = "GetDistance";
+    goto read_distance_error;
   }
 
-  ESP_LOGD(TAG, "read_distance_mm successfull/n  rangeStatus: %d/n  distance_mm: %d", rangeStatus, distance_mm);
+  distance_mm = tmp_distance;
+  ESP_LOGVV(TAG, "read_distance_mm successfull\n  distance_mm: %d", distance_mm);
 
-  VL53L1X_ClearInterrupt(this->address_);
-  VL53L1X_StopRanging(this->address_);
   return true;
+read_distance_error:
+  ESP_LOGE(TAG, "%s failed: %d", failing_call, err);
+  return false;
 }
 
 bool VL53L1Sensor::set_distance_mode_(DistanceMode mode) {
