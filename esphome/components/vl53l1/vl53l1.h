@@ -21,6 +21,7 @@ enum DistanceMode : uint8_t { SHORT = 0, LONG = 2 };
 
 class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c::I2CDevice {
  public:
+  VL53L1Sensor();
   void setup() override;
   void dump_config() override;
   void update() override;
