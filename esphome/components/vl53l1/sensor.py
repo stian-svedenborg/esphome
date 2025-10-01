@@ -29,6 +29,16 @@ DISTANCE_MODE = {
     "long": DISTANCE_MODE_ENUM.LONG,
 }
 
+TIMING_BUDGET = {
+    "15ms": 15,
+    "20ms": 20,
+    "33ms": 33,
+    "50ms": 50,
+    "100ms": 100,
+    "200ms": 200,
+    "500ms": 500,
+}
+
 
 def check_keys(obj):
     if obj[CONF_ADDRESS] != 0x29 and CONF_ENABLE_PIN not in obj:
@@ -69,12 +79,8 @@ CONFIG_SCHEMA = cv.All(
                 ),
             ),
             cv.Optional(CONF_ENABLE_PIN): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_TIMING_BUDGET, default="50ms"): cv.All(
-                cv.positive_time_period_milliseconds,
-                cv.Range(
-                    min=cv.TimePeriod(milliseconds=15),
-                    max=cv.TimePeriod(milliseconds=500),
-                ),
+            cv.Optional(CONF_TIMING_BUDGET, default="50ms"): cv.enum(
+                TIMING_BUDGET, lower=True
             ),
             cv.Optional(CONF_DISTANCE_MODE, default="short"): cv.enum(
                 DISTANCE_MODE, lower=True
