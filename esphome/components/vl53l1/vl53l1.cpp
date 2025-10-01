@@ -77,13 +77,15 @@ void VL53L1Sensor::setup() {
   this->set_distance_mode_(this->distance_mode_);
   this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
+
+  this->calibrate();
+
   // Enable measurements
   if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGE(TAG, "StartRanging failed: %d", err);
     this->mark_failed();
   }
 
-  this->calibrate();
 }
 
 void VL53L1Sensor::dump_config() {
