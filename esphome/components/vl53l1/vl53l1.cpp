@@ -37,8 +37,8 @@ void VL53L1Sensor::setup() {
   this->set_timing_budget_(this->measurement_timing_budget_us_);
 
   // Enable measurements
-  uint8_t err = 0;
-  if ((err = VL53L1X_StartRanging(this->address_)) != 0) {
+
+  if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "StartRanging failed: %d", err);
     this->mark_failed();
   }
