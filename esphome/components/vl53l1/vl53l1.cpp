@@ -78,7 +78,7 @@ void VL53L1Sensor::setup() {
   this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
 
-  this->calibrate();
+  //this->calibrate();
 
   // Enable measurements
   if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
