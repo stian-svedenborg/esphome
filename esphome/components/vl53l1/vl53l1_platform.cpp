@@ -22,16 +22,28 @@
 
   namespace esphome {
     namespace vl53l1 {
+
+      
+
       static std::map<uint16_t, ::esphome::i2c::I2CDevice*> devices;
+      static ::esphome::i2c::I2CDevice* bootstrap_device{nullptr};
       
       void register_sensor(::esphome::i2c::I2CDevice* dev) {
-        devices[dev->get_i2c_address()] = dev;
-        if (dev->get_i2c_address() != 0x29){
-          devices[0x29] = dev;
-        }
+          devices[dev->get_i2c_address()] = dev;
+      }
+
+      void set_bootstrap_device(::esphome::i2c::I2CDevice* dev) {
+        bootstrap_device = dev;
       }
       
+      void clear_bootstrap_device() {
+        bootstrap_device = nullptr;
+      }
+
       ::esphome::i2c::I2CDevice* lookup(uint16_t devAddr) {
+        if (devAddr == 0x29 && bootstrap_device) {
+          return bootstrap_device;
+        }
         return devices.at(devAddr);
       }
 

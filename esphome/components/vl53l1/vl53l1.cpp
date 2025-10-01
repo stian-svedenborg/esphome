@@ -2,6 +2,8 @@
 #include "esphome/components/i2c/i2c.h"
 #include "esphome/core/log.h"
 #include "VL53L1X_api.h"
+#include <map>
+#include <cassert>
 
 
 namespace esphome {
@@ -12,24 +14,34 @@ using namespace st_vl53l1x_uld;
 static const char *const TAG = "vl53l1";
 constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29;
 
+bool VL53L1Sensor::pin_setup_complete = false;
+std::list<VL53L1Sensor*> VL53L1Sensor::all_sensors;
+
 
 void VL53L1Sensor::setup() {
   VL53L1X_ERROR err = 0;
-  ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
-  if (this->enable_pin_ != nullptr) {
-    this->enable_pin_->setup();
-    this->enable_pin_->digital_write(true);
-  }
 
-  // Setup I2C Address
-  esphome::delay(3);
-  register_sensor(this); // Bridge I2C for vendor API
-  ESP_LOGD(TAG, "ADDRESS: %x", this->address_);
-  // The first address argument is used to hook the currently configured the I2CDevice in the platform bridge. 
-  if ((err = VL53L1X_SetI2CAddress(0x29, this->address_ << 1)) != VL53L1X_ERROR_NONE) {
-    ESP_LOGE(TAG, "SetI2CAddress failed: %d", err);
-    this->mark_failed();
-    return;
+  ESP_LOGCONFIG(TAG, "Setting up VL53L1...");
+
+  if (!this->pin_setup_complete) {
+    // Disable all sensors that have enable_pins set.
+    for (auto sensor : this->all_sensors) {
+        sensor->enable_pin_setup();
+        sensor->disable();
+    }
+    this->pin_setup_complete = true;
+  }
+  ::esphome::delay(2);
+  
+  // Powercycle this sensor to reset address to DEFAULT_I2C_ADDRESS
+  this->enable();
+  ::esphome::delay(2);
+  
+  uint16_t final_i2c_address = this->get_i2c_address();
+  
+  set_bootstrap_device(this);
+  if (final_i2c_address != DEFAULT_I2C_ADDRESS) {
+    this->set_i2c_address(DEFAULT_I2C_ADDRESS);
   }
   
   this->initialized_ = this->init_sensor_();
@@ -38,12 +50,24 @@ void VL53L1Sensor::setup() {
     return;
   }
 
+  if (this->address_ != final_i2c_address) {
+    // The first address argument is used to hook the currently configured the I2CDevice in the platform bridge. 
+    if ((err = VL53L1X_SetI2CAddress(this->address_, final_i2c_address << 1)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGE(TAG, "SetI2CAddress failed: %d", err);
+      this->mark_failed();
+      return;
+    }
+    
+    this->set_i2c_address(final_i2c_address);
+  }
+  register_sensor(this); // Bridge I2C for vendor API
+  clear_bootstrap_device();
+
   // Apply configuration
   this->set_distance_mode_(this->distance_mode_);
   this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
   // Enable measurements
-
   if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGE(TAG, "StartRanging failed: %d", err);
     this->mark_failed();
@@ -82,6 +106,28 @@ void VL53L1Sensor::update() {
   ESP_LOGD(TAG, "Distance: %.3f m", distance_m);
   this->publish_state(distance_m);
 }
+
+void VL53L1Sensor::enable_pin_setup() { 
+  if (this->enable_pin_ != nullptr) {
+    this->enable_pin_->setup();
+  }
+ }
+
+
+bool VL53L1Sensor::enable() { 
+  if (this->enable_pin_ != nullptr) {
+    this->enable_pin_->digital_write(true);
+    return true;
+  }
+  return false;
+ }
+
+ void VL53L1Sensor::disable() { 
+  if (this->enable_pin_ != nullptr) {
+    this->enable_pin_->digital_write(false);
+    
+  }
+ }
 
 bool VL53L1Sensor::init_sensor_() {
   uint8_t boot = 0;
