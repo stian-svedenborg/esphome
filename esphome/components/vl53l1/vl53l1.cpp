@@ -24,7 +24,7 @@ void VL53L1Sensor::setup() {
   // Setup I2C Address
   esphome::delay(3);
   register_sensor(this); // Bridge I2C for vendor API
-  if ((err = VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address())) == VL53L1X_ERROR_NONE) {
+  if ((err = VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address())) != VL53L1X_ERROR_NONE) {
     ESP_LOGE(TAG, "SetI2CAddress failed: %d", err);
     this->mark_failed();
     return;
@@ -52,8 +52,8 @@ void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");
   LOG_I2C_DEVICE(this);
   LOG_UPDATE_INTERVAL(this);
-  ESP_LOGCONFIG(TAG, "  Timeout: %u us", (unsigned) this->timeout_ms_);
-  ESP_LOGCONFIG(TAG, "  Timing Budget: %u us", (unsigned) this->measurement_timing_budget_ms_);
+  ESP_LOGCONFIG(TAG, "  Timeout: %u ms", (unsigned) this->timeout_ms_);
+  ESP_LOGCONFIG(TAG, "  Timing Budget: %u ms", (unsigned) this->measurement_timing_budget_ms_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
   if (this->enable_pin_ != nullptr) {
     LOG_PIN("  Enable Pin: ", this->enable_pin_);
