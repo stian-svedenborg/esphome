@@ -36,20 +36,18 @@ def check_keys(obj):
             "Address other then 0x29 requires enable_pin definition to allow sensor\r"
         )
         msg += (
-            "re-addressing. Also if you have more then one VL53 device on the same\r"
+            "re-addressing. Also if you have more then one VL53L1x device on the same\r"
         )
         msg += (
             "i2c bus, then all VL53 devices must have enable_pin defined."
         )
         raise cv.Invalid(msg)
+    
+    if obj[CONF_DISTANCE_MODE] == "long" and obj[CONF_TIMING_BUDGET] < 200:
+        msg = "When (distance_mode == long) the sensor requires a timing budget of at least 200ms"
+        raise cv.Invalid(msg)
+
     return obj
-
-
-def check_timeout(value):
-    value = cv.positive_time_period_microseconds(value)
-    if value.total_microseconds > 60 * 1000 * 1000:
-        raise cv.Invalid("Maximum timeout can not be greater then 60 seconds")
-    return value
 
 
 CONFIG_SCHEMA = cv.All(
@@ -63,13 +61,19 @@ CONFIG_SCHEMA = cv.All(
     )
     .extend(
         {
-            cv.Optional(CONF_TIMEOUT, default="50ms"): check_timeout,
-            cv.Optional(CONF_ENABLE_PIN): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_TIMING_BUDGET): cv.All(
-                cv.positive_time_period_microseconds,
+            cv.Optional(CONF_TIMEOUT, default="50ms"):  cv.All(
+                cv.positive_time_period_milliseconds,
                 cv.Range(
-                    min=cv.TimePeriod(microseconds=20000),
-                    max=cv.TimePeriod(microseconds=200000),
+                    min=cv.TimePeriod(milliseconds=1),
+                    max=cv.TimePeriod(milliseconds=1000),
+                ),
+            ),
+            cv.Optional(CONF_ENABLE_PIN): pins.gpio_output_pin_schema,
+            cv.Optional(CONF_TIMING_BUDGET, default="50ms"): cv.All(
+                cv.positive_time_period_milliseconds,
+                cv.Range(
+                    min=cv.TimePeriod(milliseconds=15),
+                    max=cv.TimePeriod(milliseconds=500),
                 ),
             ),
             cv.Optional(CONF_DISTANCE_MODE, default="short"): cv.enum(
@@ -87,15 +91,13 @@ async def to_code(config):
     var = await sensor.new_sensor(config)
     await cg.register_component(var, config)
 
-    cg.add(var.set_timeout_us(config[CONF_TIMEOUT]))
+    cg.add(var.set_timeout_ms(config[CONF_TIMEOUT]))
 
     if CONF_ENABLE_PIN in config:
         enable = await cg.gpio_pin_expression(config[CONF_ENABLE_PIN])
         cg.add(var.set_enable_pin(enable))
 
-    if timing_budget := config.get(CONF_TIMING_BUDGET):
-        cg.add(var.set_timing_budget(timing_budget))
-
+    cg.add(var.set_timing_budget(config[CONF_TIMING_BUDGET]))
     cg.add(var.set_distance_mode(config[CONF_DISTANCE_MODE]))
 
     await i2c.register_i2c_device(var, config)

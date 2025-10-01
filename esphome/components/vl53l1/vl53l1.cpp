@@ -34,7 +34,7 @@ void VL53L1Sensor::setup() {
 
   // Apply configuration
   this->set_distance_mode_(this->distance_mode_);
-  this->set_timing_budget_(this->measurement_timing_budget_us_);
+  this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
   // Enable measurements
 
@@ -48,8 +48,8 @@ void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");
   LOG_I2C_DEVICE(this);
   LOG_UPDATE_INTERVAL(this);
-  ESP_LOGCONFIG(TAG, "  Timeout: %u us", (unsigned) this->timeout_us_);
-  ESP_LOGCONFIG(TAG, "  Timing Budget: %u us", (unsigned) this->measurement_timing_budget_us_);
+  ESP_LOGCONFIG(TAG, "  Timeout: %u us", (unsigned) this->timeout_ms_);
+  ESP_LOGCONFIG(TAG, "  Timing Budget: %u us", (unsigned) this->measurement_timing_budget_ms_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
   if (this->enable_pin_ != nullptr) {
     LOG_PIN("  Enable Pin: ", this->enable_pin_);
@@ -123,7 +123,7 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
   uint8_t rangeStatus = 0;
   uint16_t tmp_distance = 0;
 
-  while ((micros() - start_us) < this->timeout_us_) {
+  while ((micros() - start_us) < this->timeout_ms_*1000) {
     if (err = VL53L1X_CheckForDataReady(this->address_, &ready) != VL53L1X_ERROR_NONE) {
       failing_call = "CheckForDataReady";
       goto read_distance_error;
@@ -167,22 +167,18 @@ read_distance_error:
 }
 
 bool VL53L1Sensor::set_distance_mode_(DistanceMode mode) {
-  this->distance_mode_ = mode;
   uint8_t err = 0;
   uint16_t vendor_mode = (mode == DistanceMode::SHORT) ? 1 : 2;  // ULD supports short/long
-  if ((err = VL53L1X_SetDistanceMode(this->address_, vendor_mode)) != 0) {
+  if ((err = VL53L1X_SetDistanceMode(this->address_, vendor_mode)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetDistanceMode failed: %d", err);
     return false;
   }
   return true;
 }
 
-bool VL53L1Sensor::set_timing_budget_(uint32_t timing_budget_us) {
-  this->measurement_timing_budget_us_ = timing_budget_us;
+bool VL53L1Sensor::set_timing_budget_(uint16_t timing_budget_ms) {
   uint8_t err = 0;
-  uint16_t ms = static_cast<uint16_t>((timing_budget_us + 500) / 1000);
-  if (ms == 0) ms = 1;
-  if ((err = VL53L1X_SetTimingBudgetInMs(this->address_, ms)) != 0) {
+  if ((err = VL53L1X_SetTimingBudgetInMs(this->address_, timing_budget_ms)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetTimingBudgetInMs failed: %d", err);
     return false;
   }
