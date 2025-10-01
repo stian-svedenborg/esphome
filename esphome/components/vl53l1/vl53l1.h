@@ -30,14 +30,18 @@ class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c:
   void set_timing_budget(uint32_t timing_budget) { this->measurement_timing_budget_ms_ = timing_budget; }
   void set_distance_mode(DistanceMode mode) { this->distance_mode_ = mode; }
 
+  /** Calibrate the sensor and store the result in the firmware.
+   *  The calibration should be done using a 17% grey reflective surface at 10cm.
+   */
+  int16_t calibrate();
+
+ protected:
+  
   /** Enable the device. Will pull the enable pin high, if configured. */
   bool enable();
   /** Disable the device. Will pull the enable pin low, if configured. */
   void disable();
 
-  ::esphome::i2c::I2CBus* get_i2c_bus();
-
- protected:
   bool init_sensor_();
   void enable_pin_setup();
   bool read_distance_mm_(uint16_t &distance_mm);
