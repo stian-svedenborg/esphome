@@ -17,6 +17,9 @@ constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29;
 bool VL53L1Sensor::pin_setup_complete = false;
 std::list<VL53L1Sensor*> VL53L1Sensor::all_sensors;
 
+VL53L1Sensor::VL53L1Sensor() {
+  all_sensors.push_back(this);
+}
 
 void VL53L1Sensor::setup() {
   VL53L1X_ERROR err = 0;
