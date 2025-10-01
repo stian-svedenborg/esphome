@@ -25,7 +25,7 @@ void VL53L1Sensor::setup() {
   esphome::delay(3);
   register_sensor(this); // Bridge I2C for vendor API
   if ((err = VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address())) == VL53L1X_ERROR_NONE) {
-    ESP_LOGW(TAG, "StartRanging failed: %d", err);
+    ESP_LOGW(TAG, "SetI2CAddress failed: %d", err);
     this->mark_failed();
     return;
   }
