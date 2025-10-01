@@ -23,8 +23,8 @@ void VL53L1Sensor::setup() {
 
   // Setup I2C Address
   esphome::delay(3);
-  VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address());
   register_sensor(this); // Bridge I2C for vendor API
+  VL53L1X_SetI2CAddress(DEFAULT_I2C_ADDRESS, this->get_i2c_address());
   
   this->initialized_ = this->init_sensor_();
   if (!this->initialized_) {
