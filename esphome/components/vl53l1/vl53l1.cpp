@@ -219,7 +219,7 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
       goto read_distance_error;
   }
   if (rangeStatus != 0) {
-    ESP_LOGW(TAG, "Range failure: %d", range_status_to_str(rangeStatus));
+    ESP_LOGW(TAG, "Range failure: %s", range_status_to_str(rangeStatus));
     return false;
   }
     
