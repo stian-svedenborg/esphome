@@ -22,6 +22,18 @@ VL53L1Sensor = vl53l1_ns.class_(
 
 CONF_TIMING_BUDGET = "timing_budget"
 CONF_DISTANCE_MODE = "distance_mode"
+CONF_INTERRUPT_POLARITY = "interrupt_polarity"
+CONF_INTER_MEASUREMENT_INTERVAL = "inter_measurement_interval"
+CONF_OFFSET = "offset"
+CONF_XTALK_CORRECTION = "xtalk_correction"
+CONF_DISTANCE_THRESHOLD = "distance_threshold"
+CONF_ROI = "region_of_interest"
+CONF_ROI_X = "x"
+CONF_ROI_Y = "y"
+CONF_ROI_W = "w"
+CONF_ROI_H = "h"
+CONF_SIGNAL_THRESHOLD = "signal_threshold"
+CONF_SIGMA_THRESHOLD = "sigma_threshold"
 
 DISTANCE_MODE_ENUM = vl53l1_ns.enum("DistanceMode")
 DISTANCE_MODE = {
@@ -56,6 +68,12 @@ def check_keys(obj):
     if obj[CONF_DISTANCE_MODE] == "long" and obj[CONF_TIMING_BUDGET] not in ("200ms", "500ms"):
         msg = "When (distance_mode == long) the sensor requires a timing budget of at least 200ms"
         raise cv.Invalid(msg)
+    
+    if obj[CONF_ROI] is not None:
+        if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 16 
+            or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 16):
+            msg = "Region of interest coordinates cannot exceed 16 in either axis."
+            raise cv.Invalid(msg)
 
     return obj
 
@@ -85,6 +103,12 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_DISTANCE_MODE, default="short"): cv.enum(
                 DISTANCE_MODE, lower=True
             ),
+            cv.Optional(CONF_ROI): {
+                    cv.Required(CONF_ROI_X): cv.int_range(min=0, max=16),
+                    cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=10),
+                    cv.Required(CONF_ROI_W): cv.int_range(min=4, max=16),
+                    cv.Required(CONF_ROI_H): cv.int_range(min=4, max=16),
+                }
         }
     )
     .extend(cv.polling_component_schema("60s"))
