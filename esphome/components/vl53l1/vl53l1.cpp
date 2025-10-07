@@ -132,6 +132,14 @@ void VL53L1Sensor::update() {
   const float distance_m = distance_mm / 1000.0f;
   ESP_LOGD(TAG, "Distance: %.3f m", distance_m);
   this->publish_state(distance_m);
+
+  if (this->interrupt_pin_ != nullptr) {
+    VL53L1X_ERROR err = 0;
+    if ((err = VL53L1X_ClearInterrupt(this->address_)) == VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
+    } 
+  }
+
 }
 
 void VL53L1Sensor::enable_pin_setup() { 
