@@ -30,11 +30,6 @@ class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c:
   void set_timing_budget(uint32_t timing_budget) { this->measurement_timing_budget_ms_ = timing_budget; }
   void set_distance_mode(DistanceMode mode) { this->distance_mode_ = mode; }
 
-  /** Calibrate the sensor and store the result in the firmware.
-   *  The calibration should be done using a 17% grey reflective surface at 10cm.
-   */
-  int16_t calibrate();
-
  protected:
   
   /** Enable the device. Will pull the enable pin high, if configured. */
@@ -47,6 +42,8 @@ class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c:
   bool read_distance_mm_(uint16_t &distance_mm);
   bool set_distance_mode_(DistanceMode mode);
   bool set_timing_budget_(uint16_t timing_budget_us);
+
+  static const char * range_status_to_str(uint8_t range_status);
 
   GPIOPin *enable_pin_{nullptr};
   uint32_t timeout_ms_{50};

@@ -21,6 +21,9 @@ static const char *const TAG = "vl53l1";
 // one after another as we are bringing them online and register the updated
 // I2C address with the sensor firmware.
 constexpr ::uint8_t DEFAULT_I2C_ADDRESS = 0x29; 
+
+
+
 bool VL53L1Sensor::pin_setup_complete = false;
 std::list<VL53L1Sensor*> VL53L1Sensor::all_sensors;
 
@@ -189,6 +192,17 @@ setup_error:
   return false;
 }
 
+static const char * range_status_to_str(uint8_t range_status) {
+  switch (range_status) {
+    case 0: return "ok";
+    case 1: return "sigma failure";
+    case 2: return "signal failure";
+    case 4: return "too far away";
+    case 7: return "wraparound";
+    default: return "unknown" 
+  }
+}
+
 bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
   const char* failing_call = "";
   uint8_t err = 0;
@@ -216,25 +230,18 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
       failing_call = "GetRangeStatus";
       goto read_distance_error;
   }
-  switch(rangeStatus) {
-    case 0: break;
-    case 1:
-    case 2:
-      ESP_LOGW(TAG, "Range failure: %d", rangeStatus);
-      return false;
-    default:
-      ESP_LOGE(TAG, "Critical range failure: %d", rangeStatus);
-      return false;
+  if (rangeStatus != 0) {
+    ESP_LOGW(TAG, "Range failure: %d", range_status_to_str(rangeStatus));
+    return false;
   }
+    
   
   if ((err = VL53L1X_GetDistance(this->address_, &tmp_distance)) != VL53L1X_ERROR_NONE) {
     failing_call = "GetDistance";
     goto read_distance_error;
   }
-  
   distance_mm = tmp_distance;
-  ESP_LOGI(TAG, "read_distance_mm successfull\n  distance_mm: %d", distance_mm);
-
+  
   return true;
 read_distance_error:
   ESP_LOGE(TAG, "%s failed: %d", failing_call, err);
