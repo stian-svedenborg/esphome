@@ -5,11 +5,13 @@ import esphome.config_validation as cv
 from esphome.const import (
     CONF_ADDRESS,
     CONF_ENABLE_PIN,
+    CONF_INTERRUPT_PIN,
     CONF_TIMEOUT,
     DEVICE_CLASS_DISTANCE,
     ICON_ARROW_EXPAND_VERTICAL,
     STATE_CLASS_MEASUREMENT,
     UNIT_METER,
+
 )
 
 DEPENDENCIES = ["i2c"]
@@ -27,6 +29,9 @@ CONF_INTER_MEASUREMENT_INTERVAL = "inter_measurement_interval"
 CONF_OFFSET = "offset"
 CONF_XTALK_CORRECTION = "xtalk_correction"
 CONF_DISTANCE_THRESHOLD = "distance_threshold"
+CONF_MIN = "min"
+CONF_MAX = "max"
+CONF_INTERRUPT_WHEN = "interrupt_when"
 CONF_ROI = "region_of_interest"
 CONF_ROI_X = "x"
 CONF_ROI_Y = "y"
@@ -51,6 +56,12 @@ TIMING_BUDGET = {
     "500ms": 500,
 }
 
+INTERRUPT_WHEN = {
+    "below_min": 0,
+    "above_max": 1,
+    "outside_window": 2,
+    "inside_window": 3
+}
 
 def check_keys(obj):
     if obj[CONF_ADDRESS] != 0x29 and CONF_ENABLE_PIN not in obj:
@@ -103,12 +114,33 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_DISTANCE_MODE, default="short"): cv.enum(
                 DISTANCE_MODE, lower=True
             ),
+            cv.Optional(CONF_OFFSET) : cv.All(
+                cv.distance(),
+                cv.float_range(-4.0, 12.0)
+            ),
+            cv.Optional(CONF_XTALK_CORRECTION): cv.uint16_t,
             cv.Optional(CONF_ROI): cv.Schema({
                     cv.Required(CONF_ROI_X): cv.int_range(min=0, max=16),
                     cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=10),
                     cv.Required(CONF_ROI_W): cv.int_range(min=4, max=16),
                     cv.Required(CONF_ROI_H): cv.int_range(min=4, max=16),
-        })
+            }),
+            cv.Optional(CONF_SIGNAL_THRESHOLD): cv.uint16_t,
+            cv.Optional(CONF_SIGMA_THRESHOLD): cv.uint16_t,
+
+            # Interrupt config
+            cv.Optional(CONF_INTERRUPT_PIN): pins.gpio_input_pin_schema,
+            cv.Optional(CONF_DISTANCE_THRESHOLD): cv.Schema({
+                cv.Optional(CONF_MIN): cv.All(
+                    cv.distance(),
+                    cv.float_range(0.0, 4.0)
+                ),
+                cv.Optional(CONF_MAX): cv.All(
+                    cv.distance(),
+                    cv.float_range(0.0, 4.0)
+                ),
+                cv.Required(CONF_INTERRUPT_WHEN): cv.enum(INTERRUPT_WHEN, lower=True)
+            })
         }
     )
     .extend(cv.polling_component_schema("60s"))
