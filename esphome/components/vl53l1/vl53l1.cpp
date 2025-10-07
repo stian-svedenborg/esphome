@@ -30,6 +30,11 @@ VL53L1Sensor::VL53L1Sensor() {
   all_sensors.push_back(this);
 }
 
+
+void schedule_interrupt(void* obj) {
+  static_cast<VL53L1Sensor*>(obj)->schedule_update_from_isr();
+}
+
 void VL53L1Sensor::setup() {
   VL53L1X_ERROR err = 0;
   if (!this->pin_setup_complete) {
@@ -93,9 +98,12 @@ void VL53L1Sensor::setup() {
   }
   else {
     // configure interrupt-handler.
+    interrupt_pin_->setup();
+    interrupt_pin_->attach_interrupt(VL53L1Sensor::schedule_update_from_isr, this, gpio::INTERRUPT_RISING_EDGE);
   }
 
 }
+
 
 void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");

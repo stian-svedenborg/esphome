@@ -27,9 +27,14 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
 
   void set_timeout_ms(uint32_t timeout_ms) { this->timeout_ms_ = timeout_ms; }
   void set_enable_pin(GPIOPin *enable) { this->enable_pin_ = enable; }
+  void set_interrupt_pin(InternalGPIOPin *interrupt_pin) { this->interrupt_pin_ = interrupt_pin; }
   void set_timing_budget(uint32_t timing_budget) { this->measurement_timing_budget_ms_ = timing_budget; }
   void set_distance_mode(DistanceMode mode) { this->distance_mode_ = mode; }
   void set_update_interval(uint32_t update_interval_ms) { this->update_interval_ms_ = update_interval_ms; }
+
+  void schedule_update_from_isr() {
+    this->defer([this](){this->update();});
+  }
 
  protected:
   
@@ -46,7 +51,7 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
 
 
   GPIOPin *enable_pin_{nullptr};
-  GPIOPin *interrupt_pin_{nullptr};
+  InternalGPIOPin *interrupt_pin_{nullptr};
   uint32_t timeout_ms_{50};
   uint32_t measurement_timing_budget_ms_{50};
   uint32_t update_interval_ms_{60000};

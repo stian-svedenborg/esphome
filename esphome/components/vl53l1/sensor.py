@@ -132,7 +132,7 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_SIGMA_THRESHOLD): cv.uint16_t,
 
             # Interrupt config
-            cv.Optional(CONF_INTERRUPT_PIN): pins.gpio_input_pin_schema,
+            cv.Optional(CONF_INTERRUPT_PIN): pins.internal_gpio_input_pin_schema,
             cv.Optional(CONF_DISTANCE_THRESHOLD): cv.Schema({
                 cv.Optional(CONF_MIN): cv.All(
                     cv.distance,
@@ -157,6 +157,10 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     cg.add(var.set_timeout_ms(config[CONF_TIMEOUT]))
+
+    if CONF_ENABLE_PIN in config:
+        enable = await cg.gpio_pin_expression(config[CONF_ENABLE_PIN])
+        cg.add(var.set_enable_pin(enable))
 
     if CONF_ENABLE_PIN in config:
         enable = await cg.gpio_pin_expression(config[CONF_ENABLE_PIN])
