@@ -80,14 +80,7 @@ void VL53L1Sensor::setup() {
   this->set_distance_mode_(this->distance_mode_);
   this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
-
-  //this->calibrate();
-
-  // Enable measurements
-  if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
-    ESP_LOGE(TAG, "StartRanging failed: %d", err);
-    this->mark_failed();
-  }
+  this->set_update_interval_(this->update_interval_ms_);
 
   if (interrupt_pin_ == nullptr) {
     this->set_interval("update", this->update_interval_ms_, [this]() { this->update(); });
@@ -97,6 +90,13 @@ void VL53L1Sensor::setup() {
     interrupt_pin_->setup();
     interrupt_pin_->attach_interrupt(VL53L1Sensor::schedule_update_from_isr, this, gpio::INTERRUPT_RISING_EDGE);
   }
+
+  // Enable measurements
+  if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
+    ESP_LOGE(TAG, "StartRanging failed: %d", err);
+    this->mark_failed();
+  }
+
 
 }
 
@@ -269,6 +269,15 @@ bool VL53L1Sensor::set_timing_budget_(uint16_t timing_budget_ms) {
   uint8_t err = 0;
   if ((err = VL53L1X_SetTimingBudgetInMs(this->address_, timing_budget_ms)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetTimingBudgetInMs failed: %d", err);
+    return false;
+  }
+  return true;
+}
+
+bool VL53L1Sensor::set_update_interval_(uint16_t update_interval_ms) {
+  uint8_t err = 0;
+  if ((err = VL53L1X_SetInterMeasurementInMs(this->address_, update_interval_ms)) != VL53L1X_ERROR_NONE) {
+    ESP_LOGW(TAG, "SetInterMeasurementInMs failed: %d", err);
     return false;
   }
   return true;

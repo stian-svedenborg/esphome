@@ -52,6 +52,7 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
   bool read_distance_mm_(uint16_t &distance_mm);
   bool set_distance_mode_(DistanceMode mode);
   bool set_timing_budget_(uint16_t timing_budget_us);
+  bool set_update_interval_(uint16_t update_interval_ms);
 
 
   GPIOPin *enable_pin_{nullptr};
