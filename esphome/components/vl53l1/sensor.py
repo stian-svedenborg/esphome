@@ -7,11 +7,11 @@ from esphome.const import (
     CONF_ENABLE_PIN,
     CONF_INTERRUPT_PIN,
     CONF_TIMEOUT,
+    CONF_UPDATE_INTERVAL,
     DEVICE_CLASS_DISTANCE,
     ICON_ARROW_EXPAND_VERTICAL,
     STATE_CLASS_MEASUREMENT,
     UNIT_METER,
-
 )
 
 DEPENDENCIES = ["i2c"]
@@ -19,7 +19,7 @@ CODEOWNERS = ["@stian-svedenborg"]
 
 vl53l1_ns = cg.esphome_ns.namespace("vl53l1")
 VL53L1Sensor = vl53l1_ns.class_(
-    "VL53L1Sensor", sensor.Sensor, cg.PollingComponent, i2c.I2CDevice
+    "VL53L1Sensor", sensor.Sensor, cg.Component, i2c.I2CDevice
 )
 
 CONF_TIMING_BUDGET = "timing_budget"
@@ -100,6 +100,9 @@ CONFIG_SCHEMA = cv.All(
     )
     .extend(
         {
+            cv.Optional(CONF_UPDATE_INTERVAL, default="60s"): cv.All(
+                cv.positive_time_period_milliseconds,
+            ),
             cv.Optional(CONF_TIMEOUT, default="50ms"):  cv.All(
                 cv.positive_time_period_milliseconds,
                 cv.Range(
@@ -143,7 +146,7 @@ CONFIG_SCHEMA = cv.All(
             })
         }
     )
-    .extend(cv.polling_component_schema("60s"))
+    #.extend(cv.polling_component_schema("60s"))
     .extend(i2c.i2c_device_schema(0x29)),
     check_keys,
 )
@@ -158,6 +161,8 @@ async def to_code(config):
     if CONF_ENABLE_PIN in config:
         enable = await cg.gpio_pin_expression(config[CONF_ENABLE_PIN])
         cg.add(var.set_enable_pin(enable))
+
+    cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
 
     cg.add(var.set_timing_budget(config[CONF_TIMING_BUDGET]))
     cg.add(var.set_distance_mode(config[CONF_DISTANCE_MODE]))

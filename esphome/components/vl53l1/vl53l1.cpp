@@ -88,12 +88,19 @@ void VL53L1Sensor::setup() {
     this->mark_failed();
   }
 
+  if (interrupt_pin_ == nullptr) {
+    this->set_interval("update", this->update_interval_ms_, [this]() { this->update(); });
+  }
+  else {
+    // configure interrupt-handler.
+  }
+
 }
 
 void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");
   LOG_I2C_DEVICE(this);
-  LOG_UPDATE_INTERVAL(this);
+  ESP_LOGCONFIG(TAG, "  Update interval: %u ms", (unsigned) this->update_interval_ms_);
   ESP_LOGCONFIG(TAG, "  Timeout: %u ms", (unsigned) this->timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Timing Budget: %u ms", (unsigned) this->measurement_timing_budget_ms_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
