@@ -115,7 +115,7 @@ CONFIG_SCHEMA = cv.All(
                 DISTANCE_MODE, lower=True
             ),
             cv.Optional(CONF_OFFSET) : cv.All(
-                cv.distance(),
+                cv.distance,
                 cv.float_range(-4.0, 12.0)
             ),
             cv.Optional(CONF_XTALK_CORRECTION): cv.uint16_t,
@@ -132,11 +132,11 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_INTERRUPT_PIN): pins.gpio_input_pin_schema,
             cv.Optional(CONF_DISTANCE_THRESHOLD): cv.Schema({
                 cv.Optional(CONF_MIN): cv.All(
-                    cv.distance(),
+                    cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
                 cv.Optional(CONF_MAX): cv.All(
-                    cv.distance(),
+                    cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
                 cv.Required(CONF_INTERRUPT_WHEN): cv.enum(INTERRUPT_WHEN, lower=True)
