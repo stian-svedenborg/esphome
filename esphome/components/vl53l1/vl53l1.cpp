@@ -31,10 +31,6 @@ VL53L1Sensor::VL53L1Sensor() {
 }
 
 
-void schedule_interrupt(void* obj) {
-  static_cast<VL53L1Sensor*>(obj)->schedule_update_from_isr();
-}
-
 void VL53L1Sensor::setup() {
   VL53L1X_ERROR err = 0;
   if (!this->pin_setup_complete) {
