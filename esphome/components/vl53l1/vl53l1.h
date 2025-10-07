@@ -43,7 +43,6 @@ class VL53L1Sensor : public sensor::Sensor, public PollingComponent, public i2c:
   bool set_distance_mode_(DistanceMode mode);
   bool set_timing_budget_(uint16_t timing_budget_us);
 
-  static const char * range_status_to_str(uint8_t range_status);
 
   GPIOPin *enable_pin_{nullptr};
   uint32_t timeout_ms_{50};
