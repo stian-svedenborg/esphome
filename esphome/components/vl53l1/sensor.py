@@ -103,12 +103,12 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_DISTANCE_MODE, default="short"): cv.enum(
                 DISTANCE_MODE, lower=True
             ),
-            cv.Optional(CONF_ROI): {
+            cv.Optional(CONF_ROI): cv.Schema({
                     cv.Required(CONF_ROI_X): cv.int_range(min=0, max=16),
                     cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=10),
                     cv.Required(CONF_ROI_W): cv.int_range(min=4, max=16),
                     cv.Required(CONF_ROI_H): cv.int_range(min=4, max=16),
-                }
+        })
         }
     )
     .extend(cv.polling_component_schema("60s"))
