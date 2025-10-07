@@ -2,7 +2,6 @@
 #include "esphome/components/i2c/i2c.h"
 #include "esphome/core/log.h"
 #include "VL53L1X_api.h"
-#include "VL53L1X_calibration.h"
 #include <map>
 #include <cassert>
 
@@ -188,7 +187,7 @@ static const char * range_status_to_str(uint8_t range_status) {
     case 2: return "signal failure";
     case 4: return "too far away";
     case 7: return "wraparound";
-    default: return "unknown" 
+    default: return "unknown" ;
   }
 }
 
