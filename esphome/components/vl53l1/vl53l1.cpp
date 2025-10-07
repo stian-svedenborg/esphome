@@ -232,8 +232,7 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
     goto read_distance_error;
   }
   
-
-  distance_mm = byteswap(tmp_distance);
+  distance_mm = tmp_distance;
   ESP_LOGI(TAG, "read_distance_mm successfull\n  distance_mm: %d", distance_mm);
 
   return true;
