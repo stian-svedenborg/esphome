@@ -69,7 +69,7 @@ def check_keys(obj):
         msg = "When (distance_mode == long) the sensor requires a timing budget of at least 200ms"
         raise cv.Invalid(msg)
     
-    if obj[CONF_ROI] is not None:
+    if CONF_ROI in obj:
         if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 16 
             or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 16):
             msg = "Region of interest coordinates cannot exceed 16 in either axis."
