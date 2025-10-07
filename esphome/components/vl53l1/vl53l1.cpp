@@ -135,7 +135,7 @@ void VL53L1Sensor::update() {
 
   if (this->interrupt_pin_ != nullptr) {
     VL53L1X_ERROR err = 0;
-    if ((err = VL53L1X_ClearInterrupt(this->address_)) == VL53L1X_ERROR_NONE) {
+    if ((err = VL53L1X_ClearInterrupt(this->address_)) != VL53L1X_ERROR_NONE) {
       ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
     } 
   }
@@ -169,7 +169,7 @@ bool VL53L1Sensor::init_sensor_() {
 
   const uint32_t start_us = micros();
   while ((micros() - start_us) < 200000) {
-    if ((err = VL53L1X_BootState(this->address_, &boot)) == VL53L1X_ERROR_NONE) {
+    if ((err = VL53L1X_BootState(this->address_, &boot)) != VL53L1X_ERROR_NONE) {
       ESP_LOGW(TAG, "BootState failed %d", err);
     } 
     if (boot) break;
