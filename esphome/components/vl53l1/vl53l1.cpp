@@ -130,17 +130,6 @@ void VL53L1Sensor::enable_pin_setup() {
   }
  }
 
-int16_t VL53L1Sensor::calibrate() {
-  VL53L1X_ERROR err = 0;
-  int16_t offset = 0;
-  if ((err = VL53L1X_CalibrateOffset(this->address_, 100, &offset)) == VL53L1X_ERROR_NONE) {
-      ESP_LOGE(TAG, "CalibrateOffset failed %d", err);
-      return 0xefff; 
-  } 
-  ESP_LOGI(TAG, "Calibration Successful. New offset: %d mm", offset);
-  return offset;
-}
-
  bool VL53L1Sensor::enable() {
    if (this->enable_pin_ != nullptr) {
      this->enable_pin_->digital_write(true);
