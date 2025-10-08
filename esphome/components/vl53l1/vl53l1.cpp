@@ -119,6 +119,16 @@ void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "  Timeout: %u ms", (unsigned) this->timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Timing Budget: %u ms", (unsigned) this->measurement_timing_budget_ms_);
   ESP_LOGCONFIG(TAG, "  Distance Mode: %u", (unsigned) this->distance_mode_);
+  ESP_LOGCONFIG(TAG, "  Offset: %d mm", this->offset);
+  ESP_LOGCONFIG(TAG, "  XTalk Correction: %u cps", this->xtalk_correction);
+  if (this->sigma_threshold != 0xffff) {
+    ESP_LOGCONFIG(TAG, "  Sigma Threshold: %u mm", (unsigned) this->sigma_threshold);
+  }
+  if (this->signal_threshold != 0xffff) {
+    ESP_LOGCONFIG(TAG, "  Signal Threshold: %u kcps", (unsigned) this->signal_threshold);
+  }
+  
+  
   if (this->enable_pin_ != nullptr) {
     LOG_PIN("  Enable Pin: ", this->enable_pin_);
   }
@@ -144,7 +154,7 @@ void VL53L1Sensor::update() {
   }
 
   const float distance_m = distance_mm / 1000.0f;
-  ESP_LOGD(TAG, "Distance: %.3f m", distance_m);
+  ESP_LOGVV(TAG, "Distance: %.3f m", distance_m);
   this->publish_state(distance_m);
 
   if (this->interrupt_pin_ != nullptr) {
@@ -219,6 +229,7 @@ static const char * range_status_to_str(uint8_t range_status) {
     case 2: return "signal failure";
     case 4: return "too far away";
     case 7: return "wraparound";
+    case 13: return "invalid region configuration";
     default: return "unknown" ;
   }
 }
