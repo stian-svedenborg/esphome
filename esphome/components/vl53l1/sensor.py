@@ -89,22 +89,22 @@ def check_keys(obj):
             raise cv.Invalid(msg)
     
     if CONF_DISTANCE_THRESHOLD in obj:
-        treshold_obj = obj[CONF_DISTANCE_THRESHOLD]
-        if CONF_MIN in treshold_obj and CONF_MAX in treshold_obj:
-            if to_uint16_mm(treshold_obj[CONF_MIN]) >= to_uint16_mm(treshold_obj[CONF_MAX]):
+        threshold_obj = obj[CONF_DISTANCE_THRESHOLD]
+        if CONF_MIN in threshold_obj and CONF_MAX in threshold_obj:
+            if to_uint16_mm(threshold_obj[CONF_MIN]) >= to_uint16_mm(threshold_obj[CONF_MAX]):
                 raise cv.Invalid("min must be less than max", [CONF_DISTANCE_THRESHOLD, CONF_MIN]) 
-        if (treshold_obj[CONF_INTERRUPT_WHEN] in ("below_min", "outside_window", "inside_window") 
-            and CONF_MIN not in treshold_obj):
+        if (threshold_obj[CONF_INTERRUPT_WHEN] in ("below_min", "outside_window", "inside_window") 
+            and CONF_MIN not in threshold_obj):
             raise cv.Invalid(
                 "When 'interrupt_when' = {}, then 'min' must be set.".format(
-                    treshold_obj[CONF_INTERRUPT_WHEN]
+                    threshold_obj[CONF_INTERRUPT_WHEN]
                 ), 
                 [CONF_DISTANCE_THRESHOLD, CONF_MIN]) 
-        if (treshold_obj[CONF_INTERRUPT_WHEN] in ("above_max", "outside_window", "inside_window") 
-            and CONF_MAX not in treshold_obj):
+        if (threshold_obj[CONF_INTERRUPT_WHEN] in ("above_max", "outside_window", "inside_window") 
+            and CONF_MAX not in threshold_obj):
             raise cv.Invalid(
                 "When 'interrupt_when' = {}, then 'max' must be set.".format(
-                    treshold_obj[CONF_INTERRUPT_WHEN]
+                    threshold_obj[CONF_INTERRUPT_WHEN]
                 ), 
                 [CONF_DISTANCE_THRESHOLD, CONF_MAX])
     return obj
@@ -193,7 +193,7 @@ async def to_code(config):
 
     if CONF_DISTANCE_THRESHOLD in config:
         threshold_obj = config[CONF_DISTANCE_THRESHOLD]
-        cg.add(var.set_distance_treshold(
+        cg.add(var.set_distance_threshold(
             to_uint16_mm(threshold_obj[CONF_MIN]) if CONF_MIN in threshold_obj else 0xff, 
             to_uint16_mm(threshold_obj[CONF_MAX]) if CONF_MAX in threshold_obj else 0xff, 
             threshold_obj[CONF_INTERRUPT_WHEN]))
