@@ -1,3 +1,4 @@
+import math
 from esphome import pins
 import esphome.codegen as cg
 from esphome.components import i2c, sensor
@@ -154,11 +155,11 @@ CONFIG_SCHEMA = cv.All(
             # Interrupt config
             cv.Optional(CONF_INTERRUPT_PIN): pins.gpio_input_pin_schema,
             cv.Optional(CONF_DISTANCE_THRESHOLD): cv.Schema({
-                cv.Optional(CONF_MIN, default=0xff): cv.All(
+                cv.Optional(CONF_MIN): cv.All(
                     cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
-                cv.Optional(CONF_MAX, default=0xff): cv.All(
+                cv.Optional(CONF_MAX): cv.All(
                     cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
@@ -171,6 +172,8 @@ CONFIG_SCHEMA = cv.All(
     check_keys,
 )
 
+def to_uint16_mm(meters: float) -> int:
+    return math.min(4000, math.max(0, int(math.floor(meters * 1000.0))))
 
 async def to_code(config):
     var = await sensor.new_sensor(config)
@@ -189,10 +192,11 @@ async def to_code(config):
     cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
 
     if CONF_DISTANCE_THRESHOLD in config:
+        threshold_obj = config[CONF_DISTANCE_THRESHOLD]
         cg.add(var.set_distance_treshold(
-            config[CONF_DISTANCE_THRESHOLD][CONF_MIN], 
-            config[CONF_DISTANCE_THRESHOLD][CONF_MAX], 
-            config[CONF_DISTANCE_THRESHOLD][CONF_INTERRUPT_WHEN]))
+            to_uint16_mm(threshold_obj[CONF_MIN]) if CONF_MIN in threshold_obj else 0xff, 
+            to_uint16_mm(threshold_obj[CONF_MAX]) if CONF_MAX in threshold_obj else 0xff, 
+            threshold_obj[CONF_INTERRUPT_WHEN]))
 
     cg.add(var.set_timing_budget(config[CONF_TIMING_BUDGET]))
     cg.add(var.set_distance_mode(config[CONF_DISTANCE_MODE]))
