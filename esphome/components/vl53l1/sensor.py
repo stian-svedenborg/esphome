@@ -91,7 +91,7 @@ def check_keys(obj):
     if CONF_DISTANCE_THRESHOLD in obj:
         treshold_obj = obj[CONF_DISTANCE_THRESHOLD]
         if CONF_MIN in treshold_obj and CONF_MAX in treshold_obj:
-            if treshold_obj[CONF_MIN] > treshold_obj[CONF_MAX]:
+            if to_uint16_mm(treshold_obj[CONF_MIN]) >= to_uint16_mm(treshold_obj[CONF_MAX]):
                 raise cv.Invalid("min must be less than max", [CONF_DISTANCE_THRESHOLD, CONF_MIN]) 
         if (treshold_obj[CONF_INTERRUPT_WHEN] in ("below_min", "outside_window", "inside_window") 
             and CONF_MIN not in treshold_obj):
