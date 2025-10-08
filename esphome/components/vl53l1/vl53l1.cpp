@@ -100,6 +100,7 @@ void VL53L1Sensor::setup() {
 
 }
 
+// Loop is called once per interrupt.
 void VL53L1Sensor::loop() {
   this->cancel_timeout("clear_measurement");
 
