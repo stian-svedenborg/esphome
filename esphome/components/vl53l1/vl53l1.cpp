@@ -115,6 +115,7 @@ void VL53L1Sensor::loop() {
 void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");
   LOG_I2C_DEVICE(this);
+  ESP_LOGCONFIG(TAG, "  Update Mode: %s", this->interrupt_pin_ != nullptr ? "interrupt-driven" : "polling");
   ESP_LOGCONFIG(TAG, "  Update interval: %u ms", (unsigned) this->update_interval_ms_);
   ESP_LOGCONFIG(TAG, "  Timeout: %u ms", (unsigned) this->timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Timing Budget: %u ms", (unsigned) this->measurement_timing_budget_ms_);
