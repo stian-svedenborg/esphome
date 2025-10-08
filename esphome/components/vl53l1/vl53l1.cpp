@@ -115,6 +115,9 @@ void VL53L1Sensor::dump_config() {
   if (this->enable_pin_ != nullptr) {
     LOG_PIN("  Enable Pin: ", this->enable_pin_);
   }
+  if (this->interrupt_pin_ != nullptr) {
+    LOG_PIN("  Interrupt Pin: ", this->interrupt_pin_);
+  }
   if (this->is_failed()) {
     ESP_LOGE(TAG, "  Communication failed!");
   }
@@ -282,6 +285,17 @@ bool VL53L1Sensor::set_update_interval_(uint16_t update_interval_ms) {
   if ((err = VL53L1X_SetInterMeasurementInMs(this->address_, update_interval_ms)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetInterMeasurementInMs failed: %d", err);
     return false;
+  }
+  return true;
+}
+
+bool VL53L1Sensor::apply_distance_threshold() {
+  if (this->distance_threshold.interrupt_when != NOT_SET) {
+    uint8_t err = 0;
+    if ((err = VL53L1X_SetDistanceThreshold(this->address_, this->distance_threshold.min, this->distance_threshold.max, this->distance_threshold.interrupt_when, 0)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetDistanceThreshold failed: %d", err);
+      return false;
+    }
   }
   return true;
 }

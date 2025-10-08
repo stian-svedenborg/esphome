@@ -41,6 +41,7 @@ CONF_SIGNAL_THRESHOLD = "signal_threshold"
 CONF_SIGMA_THRESHOLD = "sigma_threshold"
 
 DISTANCE_MODE_ENUM = vl53l1_ns.enum("DistanceMode")
+INTERRUPT_WHEN_MODE = vl53l1_ns.enum("InterruptWhenMode")
 DISTANCE_MODE = {
     "short": DISTANCE_MODE_ENUM.SHORT,
     "long": DISTANCE_MODE_ENUM.LONG,
@@ -57,10 +58,10 @@ TIMING_BUDGET = {
 }
 
 INTERRUPT_WHEN = {
-    "below_min": 0,
-    "above_max": 1,
-    "outside_window": 2,
-    "inside_window": 3
+    "below_min": INTERRUPT_WHEN_MODE.BELOW_MIN,
+    "above_max": INTERRUPT_WHEN_MODE.ABOVE_MAX,
+    "outside_window": INTERRUPT_WHEN_MODE.OUTSIDE_WINDOW,
+    "inside_window": INTERRUPT_WHEN_MODE.INSIDE_WINDOW
 }
 
 def check_keys(obj):
@@ -85,7 +86,26 @@ def check_keys(obj):
             or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 16):
             msg = "Region of interest coordinates cannot exceed 16 in either axis."
             raise cv.Invalid(msg)
-
+    
+    if CONF_DISTANCE_THRESHOLD in obj:
+        treshold_obj = obj[CONF_DISTANCE_THRESHOLD]
+        if CONF_MIN in treshold_obj and CONF_MAX in treshold_obj:
+            if treshold_obj[CONF_MIN] > treshold_obj[CONF_MAX]:
+                raise cv.Invalid("min must be less than max", [CONF_DISTANCE_THRESHOLD, CONF_MIN]) 
+        if (treshold_obj[CONF_INTERRUPT_WHEN] in ("below_min", "outside_window", "inside_window") 
+            and CONF_MIN not in treshold_obj):
+            raise cv.Invalid(
+                "When 'interrupt_when' = {}, then 'min' must be set.".format(
+                    treshold_obj[CONF_INTERRUPT_WHEN]
+                ), 
+                [CONF_DISTANCE_THRESHOLD, CONF_MIN]) 
+        if (treshold_obj[CONF_INTERRUPT_WHEN] in ("above_max", "outside_window", "inside_window") 
+            and CONF_MAX not in treshold_obj):
+            raise cv.Invalid(
+                "When 'interrupt_when' = {}, then 'max' must be set.".format(
+                    treshold_obj[CONF_INTERRUPT_WHEN]
+                ), 
+                [CONF_DISTANCE_THRESHOLD, CONF_MAX])
     return obj
 
 
@@ -134,11 +154,11 @@ CONFIG_SCHEMA = cv.All(
             # Interrupt config
             cv.Optional(CONF_INTERRUPT_PIN): pins.gpio_input_pin_schema,
             cv.Optional(CONF_DISTANCE_THRESHOLD): cv.Schema({
-                cv.Optional(CONF_MIN): cv.All(
+                cv.Optional(CONF_MIN, default=0xff): cv.All(
                     cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
-                cv.Optional(CONF_MAX): cv.All(
+                cv.Optional(CONF_MAX, default=0xff): cv.All(
                     cv.distance,
                     cv.float_range(0.0, 4.0)
                 ),
@@ -167,6 +187,12 @@ async def to_code(config):
         cg.add(var.set_interrupt_pin(interrupt))
 
     cg.add(var.set_update_interval(config[CONF_UPDATE_INTERVAL]))
+
+    if CONF_DISTANCE_THRESHOLD in config:
+        cg.add(var.set_distance_treshold(
+            config[CONF_DISTANCE_THRESHOLD][CONF_MIN], 
+            config[CONF_DISTANCE_THRESHOLD][CONF_MAX], 
+            config[CONF_DISTANCE_THRESHOLD][CONF_INTERRUPT_WHEN]))
 
     cg.add(var.set_timing_budget(config[CONF_TIMING_BUDGET]))
     cg.add(var.set_distance_mode(config[CONF_DISTANCE_MODE]))
