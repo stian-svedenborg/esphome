@@ -22,6 +22,7 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
  public:
   VL53L1Sensor();
   void setup() override;
+  void loop() override;
   void dump_config() override;
   void update();
 
@@ -33,10 +34,6 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
   void set_update_interval(uint32_t update_interval_ms) { this->update_interval_ms_ = update_interval_ms; }
 
   static void schedule_update_from_isr(VL53L1Sensor *sensor) {
-    sensor->defer([sensor](){
-      sensor->update();
-      sensor->disable_loop();
-    });
     sensor->enable_loop_soon_any_context();
   }
 

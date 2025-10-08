@@ -100,6 +100,10 @@ void VL53L1Sensor::setup() {
 
 }
 
+void VL53L1Sensor::loop() {
+  this->update();
+  this->disable_loop();
+}
 
 void VL53L1Sensor::dump_config() {
   ESP_LOGCONFIG(TAG, "VL53L1:");
@@ -139,7 +143,6 @@ void VL53L1Sensor::update() {
       ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
     } 
   }
-
 }
 
 void VL53L1Sensor::enable_pin_setup() { 
