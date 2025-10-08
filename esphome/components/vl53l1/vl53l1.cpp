@@ -81,6 +81,7 @@ void VL53L1Sensor::setup() {
   this->set_timing_budget_(this->measurement_timing_budget_ms_);
 
   this->set_update_interval_(this->update_interval_ms_);
+  this->apply_distance_threshold();
 
   if (interrupt_pin_ == nullptr) {
     this->set_interval("update", this->update_interval_ms_, [this]() { this->update(); });
