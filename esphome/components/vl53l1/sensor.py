@@ -77,7 +77,7 @@ def check_keys(obj):
         raise cv.Invalid(msg)
     
     if obj[CONF_DISTANCE_MODE] == "long" and obj[CONF_TIMING_BUDGET] not in ("200ms", "500ms"):
-        msg = "When (distance_mode == long) the sensor requires a timing budget of at least 200ms"
+        msg = "When 'distance_mode' = long) the sensor requires a timing budget of at least 200ms"
         raise cv.Invalid(msg)
     
     if cv.time_period(obj[CONF_UPDATE_INTERVAL]) < cv.time_period(obj[CONF_TIMING_BUDGET]):
