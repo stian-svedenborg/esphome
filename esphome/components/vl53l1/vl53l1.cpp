@@ -37,7 +37,7 @@ void VL53L1Sensor::setup() {
     ESP_LOGCONFIG(TAG, "Bootstrapping VL53L1x enable-pins...");
     // Disable all sensors that have enable_pins set.
     for (auto sensor : this->all_sensors) {
-        sensor->enable_pin_setup();
+        sensor->setup_enable_pin();
         sensor->disable();
     }
     this->pin_setup_complete = true;
@@ -77,10 +77,9 @@ void VL53L1Sensor::setup() {
   clear_bootstrap_device();
 
   // Apply configuration
-  this->set_distance_mode_(this->distance_mode_);
-  this->set_timing_budget_(this->measurement_timing_budget_ms_);
-
-  this->set_update_interval_(this->update_interval_ms_);
+  this->apply_distance_mode();
+  this->apply_timing_budget();
+  this->apply_update_interval();
   this->apply_distance_threshold();
 
   if (interrupt_pin_ == nullptr) {
@@ -149,7 +148,7 @@ void VL53L1Sensor::update() {
   }
 }
 
-void VL53L1Sensor::enable_pin_setup() { 
+void VL53L1Sensor::setup_enable_pin() { 
   if (this->enable_pin_ != nullptr) {
     this->enable_pin_->setup();
   }
@@ -262,9 +261,9 @@ read_distance_error:
   return false;
 }
 
-bool VL53L1Sensor::set_distance_mode_(DistanceMode mode) {
+bool VL53L1Sensor::apply_distance_mode() {
   uint8_t err = 0;
-  uint16_t vendor_mode = (mode == DistanceMode::SHORT) ? 1 : 2;  // ULD supports short/long
+  uint16_t vendor_mode = (this->distance_mode_ == DistanceMode::SHORT) ? 1 : 2;  // ULD supports short/long
   if ((err = VL53L1X_SetDistanceMode(this->address_, vendor_mode)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetDistanceMode failed: %d", err);
     return false;
@@ -272,18 +271,18 @@ bool VL53L1Sensor::set_distance_mode_(DistanceMode mode) {
   return true;
 }
 
-bool VL53L1Sensor::set_timing_budget_(uint16_t timing_budget_ms) {
+bool VL53L1Sensor::apply_timing_budget() {
   uint8_t err = 0;
-  if ((err = VL53L1X_SetTimingBudgetInMs(this->address_, timing_budget_ms)) != VL53L1X_ERROR_NONE) {
+  if ((err = VL53L1X_SetTimingBudgetInMs(this->address_, this->measurement_timing_budget_ms_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetTimingBudgetInMs failed: %d", err);
     return false;
   }
   return true;
 }
 
-bool VL53L1Sensor::set_update_interval_(uint16_t update_interval_ms) {
+bool VL53L1Sensor::apply_update_interval() {
   uint8_t err = 0;
-  if ((err = VL53L1X_SetInterMeasurementInMs(this->address_, update_interval_ms)) != VL53L1X_ERROR_NONE) {
+  if ((err = VL53L1X_SetInterMeasurementInMs(this->address_, this->update_interval_ms_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGW(TAG, "SetInterMeasurementInMs failed: %d", err);
     return false;
   }
