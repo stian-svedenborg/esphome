@@ -81,6 +81,7 @@ void VL53L1Sensor::setup() {
   this->apply_timing_budget();
   this->apply_update_interval();
   this->apply_distance_threshold();
+  this->apply_roi();
 
   if (interrupt_pin_ == nullptr) {
     this->set_interval("update", this->update_interval_ms_, [this]() { this->update(); });
@@ -96,8 +97,6 @@ void VL53L1Sensor::setup() {
     ESP_LOGE(TAG, "StartRanging failed: %d", err);
     this->mark_failed();
   }
-
-
 }
 
 // Loop is called once per interrupt.
@@ -308,7 +307,89 @@ bool VL53L1Sensor::apply_distance_threshold() {
   return true;
 }
 
+static const uint8_t SPAD_INDEX_TABLE[16][16] = {
+  { 128,136,144,152,160,168,176,184,  192,200,208,216,224,232,240,248 },
+  { 129,137,145,153,161,169,177,185,  193,201,209,217,225,233,241,249 },
+  { 130,138,146,154,162,170,178,186,  194,202,210,218,226,234,242,250 },
+  { 131,139,147,155,163,171,179,187,  195,203,211,219,227,235,243,251 },
+  { 132,140,148,156,164,172,180,188,  196,204,212,220,228,236,244,252 },
+  { 133,141,149,157,165,173,181,189,  197,205,213,221,229,237,245,253 },
+  { 134,142,150,158,166,174,182,190,  198,206,214,222,230,238,246,254 },
+  { 135,143,151,159,167,175,183,191,  199,207,215,223,231,239,247,255 },
+  { 127,119,111,103, 95, 87, 79, 71,   63, 55, 47, 39, 31, 23, 15,  7 },
+  { 126,118,110,102, 94, 86, 78, 70,   62, 54, 46, 38, 30, 22, 14,  6 },
+  { 125,117,109,101, 93, 85, 77, 69,   61, 53, 45, 37, 29, 21, 13,  5 },
+  { 124,116,108,100, 92, 84, 76, 68,   60, 52, 44, 36, 28, 20, 12,  4 },
+  { 123,115,107, 99, 91, 83, 75, 67,   59, 51, 43, 35, 27, 19, 11,  3 },
+  { 122,114,106, 98, 90, 82, 74, 66,   58, 50, 42, 34, 26, 18, 10,  2 },
+  { 121,113,105, 97, 89, 81, 73, 65,   57, 49, 41, 33, 25, 17,  9,  1 },
+  { 120,112,104, 96, 88, 80, 72, 64,   56, 48, 40, 32, 24, 16,  8,  0 }
+};
+
+bool VL53L1Sensor::apply_roi() {
+  if (this->roi.isSet) {
+    uint8_t err = 0;
+
+    uint8_t center_x = this->roi.x + this->roi.w/2;
+    uint8_t center_y = this->roi.y + this->roi.h/2;
+
+    if ((err = VL53L1X_SetROI(this->address_, this->roi.w, this->roi.h)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetROI failed: %d", err);
+      return false;
+    }
+
+    if ((err = VL53L1X_SetROICenter(this->address_, SPAD_INDEX_TABLE[center_y][center_x])) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetROICenter failed: %d", err);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool VL53L1Sensor::apply_offset() { 
+  if (this->offset != 0) {
+    uint8_t err = 0;
+    if ((err = VL53L1X_SetOffset(this->address_, this->offset)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetOffset failed: %d", err);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool VL53L1Sensor::apply_xtalk_correction() {
+  if (this->xtalk_correction != 0) {
+    uint8_t err = 0;
+    if ((err = VL53L1X_SetXtalk(this->address_, this->xtalk_correction)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetXtalk failed: %d", err);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool VL53L1Sensor::apply_sigma_threshold() { 
+  if (this->sigma_threshold != 0xffff) {
+    uint8_t err = 0;
+    if ((err = VL53L1X_SetSigmaThreshold(this->address_, this->sigma_threshold)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetSigmaThreshold failed: %d", err);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool VL53L1Sensor::apply_signal_threshold() { 
+  if (this->signal_threshold != 0xffff) {
+    uint8_t err = 0;
+    if ((err = VL53L1X_SetSignalThreshold(this->address_, this->signal_threshold)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "SetSignalThreshold failed: %d", err);
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace vl53l1
+
 }  // namespace esphome
-
-

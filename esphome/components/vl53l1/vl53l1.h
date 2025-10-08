@@ -44,6 +44,20 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
     this->distance_threshold.max = max != 0xff ? max : 0;
     this->distance_threshold.interrupt_when = interrupt_when;
   }
+  void set_offset(int16_t offset) {this->offset = offset; }
+  void set_xtalk_correction(uint16_t xtalk_correction) {this->xtalk_correction = xtalk_correction;}
+  void set_sigma_threshold(uint16_t sigma_threshold){ this->sigma_threshold = sigma_threshold;}
+  void set_signal_threshold(uint16_t signal_threshold){ this->signal_threshold = signal_threshold;}
+  /**
+   * Origo is upper left corner, region is coordinates 0-15.
+   */
+  void set_roi(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+    this->roi.x = x;
+    this->roi.y = y;
+    this->roi.w = w;
+    this->roi.h = h;
+    this->roi.isSet = true;
+  }
 
   static void schedule_update_from_isr(VL53L1Sensor *sensor) {
     sensor->enable_loop_soon_any_context();
@@ -64,6 +78,12 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
   bool apply_timing_budget();
   bool apply_update_interval();
   bool apply_distance_threshold();
+  bool apply_roi();
+  bool apply_offset();
+  bool apply_xtalk_correction();
+  bool apply_sigma_threshold();
+  bool apply_signal_threshold();
+  
 
 
   GPIOPin *enable_pin_{nullptr};
@@ -72,8 +92,12 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
   uint32_t measurement_timing_budget_ms_{50};
   uint32_t update_interval_ms_{60000};
   DistanceMode distance_mode_{DistanceMode::SHORT};
+  int16_t offset{0};
+  uint16_t xtalk_correction{0};
+  uint16_t sigma_threshold{0xffff};
+  uint16_t signal_threshold{0xffff};
   struct { uint16_t min{0xff}, max{0xff}; InterruptWhenMode interrupt_when{NOT_SET}; } distance_threshold; 
-  
+  struct { uint8_t x{0}, y{0}, w{0}, h{0}; bool isSet{false};} roi;
   bool initialized_{false};
 
   static std::list<VL53L1Sensor*> all_sensors;

@@ -25,8 +25,6 @@ VL53L1Sensor = vl53l1_ns.class_(
 
 CONF_TIMING_BUDGET = "timing_budget"
 CONF_DISTANCE_MODE = "distance_mode"
-CONF_INTERRUPT_POLARITY = "interrupt_polarity"
-CONF_INTER_MEASUREMENT_INTERVAL = "inter_measurement_interval"
 CONF_OFFSET = "offset"
 CONF_XTALK_CORRECTION = "xtalk_correction"
 CONF_DISTANCE_THRESHOLD = "distance_threshold"
@@ -82,10 +80,13 @@ def check_keys(obj):
         msg = "When (distance_mode == long) the sensor requires a timing budget of at least 200ms"
         raise cv.Invalid(msg)
     
+    if cv.time_period_in_milliseconds_(obj[CONF_UPDATE_INTERVAL]) < cv.time_period_in_milliseconds_(obj[CONF_TIMING_BUDGET]):
+        raise cv.Invalid("The update interval has to be at least as long the timing budget.")
+    
     if CONF_ROI in obj:
-        if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 16 
-            or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 16):
-            msg = "Region of interest coordinates cannot exceed 16 in either axis."
+        if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 15 
+            or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 15):
+            msg = "Region of interest coordinates cannot exceed (0,15) in either axis."
             raise cv.Invalid(msg)
     
     if CONF_DISTANCE_THRESHOLD in obj:
@@ -144,8 +145,8 @@ CONFIG_SCHEMA = cv.All(
             ),
             cv.Optional(CONF_XTALK_CORRECTION): cv.uint16_t,
             cv.Optional(CONF_ROI): cv.Schema({
-                    cv.Required(CONF_ROI_X): cv.int_range(min=0, max=16),
-                    cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=10),
+                    cv.Required(CONF_ROI_X): cv.int_range(min=0, max=11),
+                    cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=11),
                     cv.Required(CONF_ROI_W): cv.int_range(min=4, max=16),
                     cv.Required(CONF_ROI_H): cv.int_range(min=4, max=16),
             }),
@@ -197,6 +198,17 @@ async def to_code(config):
             to_uint16_mm(threshold_obj[CONF_MIN]) if CONF_MIN in threshold_obj else 0xff, 
             to_uint16_mm(threshold_obj[CONF_MAX]) if CONF_MAX in threshold_obj else 0xff, 
             threshold_obj[CONF_INTERRUPT_WHEN]))
+        
+    if CONF_ROI in config: 
+        roi_obj = config[CONF_ROI]
+        cg.add(var.set_roi(roi_obj[CONF_ROI_X], roi_obj[CONF_ROI_Y], roi_obj[CONF_ROI_W], roi_obj[CONF_ROI_H]))
+
+    if CONF_SIGMA_THRESHOLD in config:
+        cg.add(var.set_sigma_threshold(config[CONF_SIGMA_THRESHOLD]))
+
+    if CONF_SIGMA_THRESHOLD in config:
+        cg.add(var.set_signal_threshold(config[CONF_SIGNAL_THRESHOLD]))
+
 
     cg.add(var.set_timing_budget(config[CONF_TIMING_BUDGET]))
     cg.add(var.set_distance_mode(config[CONF_DISTANCE_MODE]))
