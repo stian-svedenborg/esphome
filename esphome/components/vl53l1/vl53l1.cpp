@@ -128,7 +128,19 @@ void VL53L1Sensor::dump_config() {
     ESP_LOGCONFIG(TAG, "  Signal Threshold: %u kcps", (unsigned) this->signal_threshold);
   }
   
+  if (this->distance_threshold.interrupt_when != NOT_SET) {
+    ESP_LOGCONFIG(TAG, "  Distance Threshold:");
+    ESP_LOGCONFIG(TAG, "     min: %u mm", this->distance_threshold.min);
+    ESP_LOGCONFIG(TAG, "     max: %u mm", this->distance_threshold.max);
+    ESP_LOGCONFIG(TAG, "     interrupt_when: %d", this->distance_threshold.interrupt_when);
+  }
   
+  if (this->roi.isSet) {
+    ESP_LOGCONFIG(TAG, "  Region of Interest:");
+    ESP_LOGCONFIG(TAG, "     TopLeft: (%u,%u)", this->roi.x, this->roi.y);
+    ESP_LOGCONFIG(TAG, "     W/H: %u/%u", this->roi.w, this->roi.h);
+  }
+
   if (this->enable_pin_ != nullptr) {
     LOG_PIN("  Enable Pin: ", this->enable_pin_);
   }
