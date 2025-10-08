@@ -101,8 +101,15 @@ void VL53L1Sensor::setup() {
 }
 
 void VL53L1Sensor::loop() {
+  this->cancel_timeout("clear_measurement");
+
   this->update();
   this->disable_loop();
+
+  // Clear measurement after two intervals with no new event.
+  this->set_timeout("clear_measurement", 2*this->update_interval_ms_, [this](){
+    this->publish_state(NAN);
+  });
 }
 
 void VL53L1Sensor::dump_config() {
