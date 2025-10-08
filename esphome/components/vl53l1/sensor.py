@@ -173,7 +173,7 @@ CONFIG_SCHEMA = cv.All(
 )
 
 def to_uint16_mm(meters: float) -> int:
-    return math.min(4000, math.max(0, int(math.floor(meters * 1000.0))))
+    return min(4000, max(0, int(meters * 1000.0)))
 
 async def to_code(config):
     var = await sensor.new_sensor(config)
