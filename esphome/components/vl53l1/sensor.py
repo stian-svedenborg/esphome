@@ -84,9 +84,9 @@ def check_keys(obj):
         raise cv.Invalid("The update interval has to be at least as long the timing budget.")
     
     if CONF_ROI in obj:
-        if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 15 
-            or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 15):
-            msg = "Region of interest coordinates cannot exceed (0,15) in either axis."
+        if ( obj[CONF_ROI][CONF_ROI_X] + obj[CONF_ROI][CONF_ROI_W] > 16 
+            or obj[CONF_ROI][CONF_ROI_Y] + obj[CONF_ROI][CONF_ROI_H] > 16):
+            msg = "Region of interest coordinates cannot exceed 16 in either axis."
             raise cv.Invalid(msg)
     
     if CONF_DISTANCE_THRESHOLD in obj:
