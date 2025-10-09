@@ -31,7 +31,7 @@
   # Optional: The sensor has a 27 degree detection region divided into a 16x16 grid.
   # Region of interest allows a smaller area to be selected to account for challenging
   # geometries.
-  # The region is specified by the top-left corner (x, y) of a detection rectangle (w x h).
+  # The region is specified by the bottom-left corner (x, y) of a detection rectangle (w x h).
   # The smallest region allowed is a 4x4 rectangle. The full rectangle must specified be within
   # the bounds. 
   region_of_interest: 
