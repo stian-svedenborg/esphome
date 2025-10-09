@@ -193,7 +193,7 @@ RetryResult VL53L1Sensor::update() {
   uint16_t distance_mm = 0;
   ReadResult readResult = this->read_distance_mm_(distance_mm);
   
-  if (readResult == ReadResult::SUCCESS) {
+  if (readResult == ReadResult::FAILURE) {
     this->publish_state(NAN);
     this->status_momentary_warning("read", 5000);
     return RetryResult::DONE;
