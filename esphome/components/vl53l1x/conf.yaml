@@ -1,3 +1,8 @@
+i2c:
+  scl: GPIOXX
+  sda: GPIOXX 
+  frequency: 400khz  # The sensor expects a 400khz i2c bus.
+
 sensor:
   - platform: vl53l1x
     name: "All Configuration Options"
@@ -6,13 +11,13 @@ sensor:
     address: 0x29 # Default: 0x29
 
     # Conditionally required: Must be set if address is not 0x29 or there are multiple VL53L1X Sensors connected on the same bus.
-    enable_pin: GPIO16
+    enable_pin: GPIOXX
 
     # Optional: If set, the sensor will operate in interrupt mode, if not set, it will operate in polling mode.
-    interrupt_pin: GPIO17
+    interrupt_pin: GPIOXX
     
     # Optional: How often the sensor will update its value.
-    update_interval: 3000ms  # Default: 60s
+    update_interval: 60s  # Default: 60s
 
     # Optional: 
     #   short: Higher precision, but can only measure values < 0.5m
