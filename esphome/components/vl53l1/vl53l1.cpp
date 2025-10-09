@@ -386,7 +386,19 @@ bool VL53L1Sensor::apply_roi() {
     uint8_t center_x = this->roi.x + this->roi.w/2;
     uint8_t center_y = this->roi.y + this->roi.h/2;
 
-    ESP_LOGW(TAG, "Center (%d, %d) spad: %d", center_x, center_y, SPAD_INDEX_TABLE[center_y][center_x]);
+    // Before config:
+    uint8_t w, h, spad;
+    if ((err = VL53L1X_GetROI_XY(this->address_, &w, &h)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "GetROI_XY failed: %d", err);
+      return false;
+    }
+
+    if ((err = VL53L1X_GetROICenter(this->address_, &spad)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "GetROICenter failed: %d", err);
+      return false;
+    }
+    ESP_LOGW(TAG, "Before Programming: (%d, %d) spad: %d", w, h, spad);
+    ESP_LOGW(TAG, "Center (%d, %d) spad: %d, w/h = %d/%d", center_x, center_y, SPAD_INDEX_TABLE[center_y][center_x], this->roi.w, this->roi.h);
 
     if ((err = VL53L1X_SetROI(this->address_, this->roi.w, this->roi.h)) != VL53L1X_ERROR_NONE) {
       ESP_LOGW(TAG, "SetROI failed: %d", err);
