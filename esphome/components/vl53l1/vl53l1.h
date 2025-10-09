@@ -31,7 +31,7 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
   void setup() override;
   void loop() override;
   void dump_config() override;
-  void update();
+  RetryResult update();
 
   void set_timeout_ms(uint32_t timeout_ms) { this->timeout_ms_ = timeout_ms; }
   void set_enable_pin(GPIOPin *enable) { this->enable_pin_ = enable; }
@@ -72,7 +72,11 @@ class VL53L1Sensor : public sensor::Sensor, public Component, public i2c::I2CDev
 
   bool init_sensor_();
   void setup_enable_pin();
-  bool read_distance_mm_(uint16_t &distance_mm);
+
+  enum ReadResult {
+    SUCCESS, FAILURE, RETRY
+  };
+  ReadResult read_distance_mm_(uint16_t &distance_mm);
 
   bool apply_distance_mode();
   bool apply_timing_budget();

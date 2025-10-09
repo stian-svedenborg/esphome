@@ -84,7 +84,27 @@ void VL53L1Sensor::setup() {
   this->apply_roi();
 
   if (interrupt_pin_ == nullptr) {
-    this->set_interval("update", this->update_interval_ms_, [this]() { this->update(); });
+    const uint32_t retry_interval = (this->measurement_timing_budget_ms_ + 3)/4;
+    const uint8_t retry_count = this->update_interval_ms_ / retry_interval; 
+
+    this->set_interval(
+      "update", 
+      this->update_interval_ms_, 
+      [this, retry_count, retry_interval]() { 
+        this->cancel_retry("retry_update");
+
+        auto retryResult = this->update();
+        // If result is not ready yet, retry in a quarter timing_budget.
+        if (retryResult == RetryResult::RETRY) {
+          this->set_retry(
+            "retry_update", 
+            retry_interval, 
+            retry_count, 
+            [this](uint8_t){return this->update();}, 
+            1.0 
+          );
+        } 
+      });
   }
   else {
     // configure interrupt-handler.
@@ -110,6 +130,13 @@ void VL53L1Sensor::loop() {
   this->set_timeout("clear_measurement", 2*this->update_interval_ms_, [this](){
     this->publish_state(NAN);
   });
+
+  if (this->interrupt_pin_ != nullptr) {
+    VL53L1X_ERROR err = 0;
+    if ((err = VL53L1X_ClearInterrupt(this->address_)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
+    } 
+  }
 }
 
 void VL53L1Sensor::dump_config() {
@@ -153,29 +180,28 @@ void VL53L1Sensor::dump_config() {
   }
 }
 
-void VL53L1Sensor::update() {
+RetryResult VL53L1Sensor::update() {
   if (!this->initialized_) {
     this->publish_state(NAN);
-    return;
+    return RetryResult::DONE;
   }
 
   uint16_t distance_mm = 0;
-  if (!this->read_distance_mm_(distance_mm)) {
+  ReadResult readResult = this->read_distance_mm_(distance_mm);
+  
+  if (readResult == ReadResult::SUCCESS) {
     this->publish_state(NAN);
     this->status_momentary_warning("read", 5000);
-    return;
+    return RetryResult::DONE;
+  }
+  else if (readResult == ReadResult::RETRY) {
+    return RetryResult::RETRY;
   }
 
   const float distance_m = distance_mm / 1000.0f;
   ESP_LOGVV(TAG, "Distance: %.3f m", distance_m);
   this->publish_state(distance_m);
 
-  if (this->interrupt_pin_ != nullptr) {
-    VL53L1X_ERROR err = 0;
-    if ((err = VL53L1X_ClearInterrupt(this->address_)) != VL53L1X_ERROR_NONE) {
-      ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
-    } 
-  }
 }
 
 void VL53L1Sensor::setup_enable_pin() { 
@@ -247,27 +273,18 @@ static const char * range_status_to_str(uint8_t range_status) {
   }
 }
 
-bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
+VL53L1Sensor::ReadResult VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm){
   const char* failing_call = "";
-  uint8_t err = 0;
-  
-  const uint32_t start_us = micros();
-  uint8_t ready = 0;
-  uint8_t rangeStatus = 0;
+  uint8_t err = 0, ready = 0, rangeStatus = 0;
   uint16_t tmp_distance = 0;
 
-  while ((micros() - start_us) < this->timeout_ms_*1000) {
-    if (err = VL53L1X_CheckForDataReady(this->address_, &ready) != VL53L1X_ERROR_NONE) {
-      failing_call = "CheckForDataReady";
-      goto read_distance_error;
-    }
-    if (ready) break;
-    delay(2);
+  if (err = VL53L1X_CheckForDataReady(this->address_, &ready) != VL53L1X_ERROR_NONE) {
+    failing_call = "CheckForDataReady";
+    goto read_distance_error;
   }
 
   if (!ready) {
-    ESP_LOGW(TAG, "Data not ready within timeout");
-    return false;
+    return ReadResult::RETRY;
   }
   
   if ((err = VL53L1X_GetRangeStatus(this->address_, &rangeStatus)) != VL53L1X_ERROR_NONE) {
@@ -276,20 +293,19 @@ bool VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm) {
   }
   if (rangeStatus != 0) {
     ESP_LOGW(TAG, "Range failure: %s", range_status_to_str(rangeStatus));
-    return false;
+    return ReadResult::FAILURE;
   }
     
-  
   if ((err = VL53L1X_GetDistance(this->address_, &tmp_distance)) != VL53L1X_ERROR_NONE) {
     failing_call = "GetDistance";
     goto read_distance_error;
   }
   distance_mm = tmp_distance;
   
-  return true;
+  return ReadResult::SUCCESS;
 read_distance_error:
   ESP_LOGE(TAG, "%s failed: %d", failing_call, err);
-  return false;
+  return ReadResult::FAILURE;
 }
 
 bool VL53L1Sensor::apply_distance_mode() {
