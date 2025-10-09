@@ -13,7 +13,7 @@ from esphome.const import (
     UNIT_METER,
 )
 
-DEPENDENCIES = ["i2c", "gpio"]
+DEPENDENCIES = ["i2c"]
 CODEOWNERS = ["@stian-svedenborg"]
 
 vl53l1x_ns = cg.esphome_ns.namespace("vl53l1x")
