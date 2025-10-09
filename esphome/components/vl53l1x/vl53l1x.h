@@ -25,9 +25,9 @@ enum InterruptWhenMode : uint8_t {
     INSIDE_WINDOW = 3
 };
 
-class VL53L1XSensor : public sensor::Sensor, public Component, public i2c::I2CDevice {
+class VL53L1xSensor : public sensor::Sensor, public Component, public i2c::I2CDevice {
  public:
-  VL53L1XSensor();
+  VL53L1xSensor();
   void setup() override;
   void loop() override;
   void dump_config() override;
@@ -58,7 +58,7 @@ class VL53L1XSensor : public sensor::Sensor, public Component, public i2c::I2CDe
     this->roi.isSet = true;
   }
 
-  static void schedule_update_from_isr(VL53L1XSensor *sensor) {
+  static void schedule_update_from_isr(VL53L1xSensor *sensor) {
     sensor->enable_loop_soon_any_context();
   }
 
@@ -102,7 +102,7 @@ class VL53L1XSensor : public sensor::Sensor, public Component, public i2c::I2CDe
   struct { uint8_t x{0}, y{0}, w{0}, h{0}; bool isSet{false};} roi;
   bool initialized_{false};
 
-  static std::list<VL53L1XSensor*> all_sensors;
+  static std::list<VL53L1xSensor*> all_sensors;
   static bool pin_setup_complete;
 };
 
