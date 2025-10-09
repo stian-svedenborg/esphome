@@ -17,7 +17,7 @@ sensor:
     interrupt_pin: GPIOXX
     
     # Optional: How often the sensor will update its value.
-    update_interval: 60s  # Default: 60s
+    update_interval: 60s # Default: 60s
 
     # Optional: 
     #   short: Higher precision, but can only measure values < 0.5m
@@ -28,7 +28,7 @@ sensor:
     # means more accurate results.
     # Valid values are: (15ms, 20ms, 33ms, 50ms, 100ms, 200ms, 500ms)
     # If 'distanse_mode' = long, then 200ms or 500ms must be used.
-    timing_budget: 200ms
+    timing_budget: 50ms  # Default: 50ms
 
     # Optional: The sensor has a 27 degree detection region divided into a 16x16 grid.
     # Region of interest allows a smaller region to be selected to account for challenging
