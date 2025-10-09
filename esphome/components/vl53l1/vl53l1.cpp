@@ -119,12 +119,12 @@ void VL53L1Sensor::setup() {
       });
   }
   else {
-    // configure interrupt-handler.
+    // If interrupt-pin is set, then configure one iteration of Component::loop() to run each interrupt.
     interrupt_pin_->setup();
     interrupt_pin_->attach_interrupt(VL53L1Sensor::schedule_update_from_isr, this, gpio::INTERRUPT_RISING_EDGE);
   }
 
-  // Enable measurements
+  // Start measurements
   if ((err = VL53L1X_StartRanging(this->address_)) != VL53L1X_ERROR_NONE) {
     ESP_LOGE(TAG, "StartRanging failed: %d", err);
     this->mark_failed();
@@ -280,7 +280,7 @@ static const char * range_status_to_str(uint8_t range_status) {
     case 2: return "signal failure";
     case 4: return "too far away";
     case 7: return "wraparound";
-    case 13: return "invalid region configuration";
+    case 13: return "invalid region of interest configuration";
     default: return "unknown" ;
   }
 }
@@ -312,9 +312,10 @@ VL53L1Sensor::ReadResult VL53L1Sensor::read_distance_mm_(uint16_t &distance_mm){
     failing_call = "GetDistance";
     goto read_distance_error;
   }
+
   distance_mm = tmp_distance;
-  
   return ReadResult::SUCCESS;
+
 read_distance_error:
   ESP_LOGE(TAG, "%s failed: %d", failing_call, err);
   return ReadResult::FAILURE;
@@ -384,6 +385,8 @@ bool VL53L1Sensor::apply_roi() {
 
     uint8_t center_x = this->roi.x + this->roi.w/2;
     uint8_t center_y = this->roi.y + this->roi.h/2;
+
+    ESP_LOGW(TAG, "Center (%d, %d)", center_x, center_y);
 
     if ((err = VL53L1X_SetROI(this->address_, this->roi.w, this->roi.h)) != VL53L1X_ERROR_NONE) {
       ESP_LOGW(TAG, "SetROI failed: %d", err);
