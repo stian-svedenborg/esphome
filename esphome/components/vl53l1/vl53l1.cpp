@@ -387,7 +387,8 @@ bool VL53L1Sensor::apply_roi() {
     uint8_t center_y = this->roi.y + this->roi.h/2;
 
     // Before config:
-    uint8_t w, h, spad;
+    uint16_t w, h; 
+    uint8_t spad;
     if ((err = VL53L1X_GetROI_XY(this->address_, &w, &h)) != VL53L1X_ERROR_NONE) {
       ESP_LOGW(TAG, "GetROI_XY failed: %d", err);
       return false;
