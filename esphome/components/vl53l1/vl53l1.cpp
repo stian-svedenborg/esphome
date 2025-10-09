@@ -100,7 +100,11 @@ void VL53L1Sensor::setup() {
             "retry_update", 
             retry_interval, 
             retry_count, 
-            [this](uint8_t){return this->update();}, 
+            [this](uint8_t count){
+              auto res = this->update();
+              ESP_LOGD(TAG, "Retry %d, result %s", count, res == RetryResult::DONE ? "Done" : "Retry");
+              return res;
+            }, 
             1.0 
           );
         } 
@@ -201,7 +205,7 @@ RetryResult VL53L1Sensor::update() {
   const float distance_m = distance_mm / 1000.0f;
   ESP_LOGVV(TAG, "Distance: %.3f m", distance_m);
   this->publish_state(distance_m);
-
+  return RetryResult::DONE;
 }
 
 void VL53L1Sensor::setup_enable_pin() { 
