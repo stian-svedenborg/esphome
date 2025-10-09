@@ -7,7 +7,6 @@ from esphome.const import (
     CONF_ADDRESS,
     CONF_ENABLE_PIN,
     CONF_INTERRUPT_PIN,
-    CONF_TIMEOUT,
     CONF_UPDATE_INTERVAL,
     DEVICE_CLASS_DISTANCE,
     ICON_ARROW_EXPAND_VERTICAL,
@@ -128,13 +127,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_UPDATE_INTERVAL, default="60s"): cv.All(
                 cv.positive_time_period_milliseconds,
             ),
-            cv.Optional(CONF_TIMEOUT, default="50ms"):  cv.All(
-                cv.positive_time_period_milliseconds,
-                cv.Range(
-                    min=cv.TimePeriod(milliseconds=1),
-                    max=cv.TimePeriod(milliseconds=1000),
-                ),
-            ),
             cv.Optional(CONF_ENABLE_PIN): pins.gpio_output_pin_schema,
             cv.Optional(CONF_TIMING_BUDGET, default="50ms"): cv.enum(
                 TIMING_BUDGET, lower=True
@@ -182,8 +174,6 @@ def to_uint16_mm(meters: float) -> int:
 async def to_code(config):
     var = await sensor.new_sensor(config)
     await cg.register_component(var, config)
-
-    cg.add(var.set_timeout_ms(config[CONF_TIMEOUT]))
 
     if CONF_ENABLE_PIN in config:
         enable = await cg.gpio_pin_expression(config[CONF_ENABLE_PIN])
