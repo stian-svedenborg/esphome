@@ -84,6 +84,11 @@ void VL53L1Sensor::setup() {
   this->apply_roi();
 
   if (interrupt_pin_ == nullptr) {
+    // If interrupt_pin is null, then we are in polling mode and should schedule an 
+    // update at the same rate as as the time between measurements.
+    // As timing can become skewed over time, we add a retry scheduled every quarter 
+    // measurement budget until next update.
+
     const uint32_t retry_interval = (this->measurement_timing_budget_ms_ + 3)/4;
     const uint8_t retry_count = this->update_interval_ms_ / retry_interval; 
 
@@ -91,18 +96,21 @@ void VL53L1Sensor::setup() {
       "update", 
       this->update_interval_ms_, 
       [this, retry_count, retry_interval]() { 
+        // Cancel any pending retry.
         this->cancel_retry("retry_update");
 
         auto retryResult = this->update();
         // If result is not ready yet, retry in a quarter timing_budget.
         if (retryResult == RetryResult::RETRY) {
+          ESP_LOGD(TAG, "Measurement not ready in time, retrying in %d ms", retry_interval);
+          
           this->set_retry(
             "retry_update", 
             retry_interval, 
             retry_count, 
             [this](uint8_t count){
               auto res = this->update();
-              ESP_LOGD(TAG, "Retry %d, result %s", count, res == RetryResult::DONE ? "Done" : "Retry");
+              ESP_LOGD(TAG, "Retry #%d, result %s", count, res == RetryResult::DONE ? "Done" : "Retry");
               return res;
             }, 
             1.0 
