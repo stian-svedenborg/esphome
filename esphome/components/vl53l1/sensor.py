@@ -148,8 +148,8 @@ CONFIG_SCHEMA = cv.All(
             ),
             cv.Optional(CONF_XTALK_CORRECTION): cv.uint16_t,
             cv.Optional(CONF_ROI): cv.Schema({
-                    cv.Required(CONF_ROI_X): cv.int_range(min=0, max=11),
-                    cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=11),
+                    cv.Required(CONF_ROI_X): cv.int_range(min=0, max=12),
+                    cv.Required(CONF_ROI_Y): cv.int_range(min=0, max=12),
                     cv.Required(CONF_ROI_W): cv.int_range(min=4, max=16),
                     cv.Required(CONF_ROI_H): cv.int_range(min=4, max=16),
             }),
