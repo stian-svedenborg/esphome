@@ -13,12 +13,12 @@ from esphome.const import (
     UNIT_METER,
 )
 
-DEPENDENCIES = ["i2c"]
+DEPENDENCIES = ["i2c", "gpio"]
 CODEOWNERS = ["@stian-svedenborg"]
 
-vl53l1_ns = cg.esphome_ns.namespace("vl53l1")
-VL53L1Sensor = vl53l1_ns.class_(
-    "VL53L1Sensor", sensor.Sensor, cg.Component, i2c.I2CDevice
+vl53l1x_ns = cg.esphome_ns.namespace("vl53l1x")
+VL53L1xSensor = vl53l1x_ns.class_(
+    "VL53L1xSensor", sensor.Sensor, cg.Component, i2c.I2CDevice
 )
 
 CONF_TIMING_BUDGET = "timing_budget"
@@ -37,8 +37,8 @@ CONF_ROI_H = "h"
 CONF_SIGNAL_THRESHOLD = "signal_threshold"
 CONF_SIGMA_THRESHOLD = "sigma_threshold"
 
-DISTANCE_MODE_ENUM = vl53l1_ns.enum("DistanceMode")
-INTERRUPT_WHEN_MODE = vl53l1_ns.enum("InterruptWhenMode")
+DISTANCE_MODE_ENUM = vl53l1x_ns.enum("DistanceMode")
+INTERRUPT_WHEN_MODE = vl53l1x_ns.enum("InterruptWhenMode")
 DISTANCE_MODE = {
     "short": DISTANCE_MODE_ENUM.SHORT,
     "long": DISTANCE_MODE_ENUM.LONG,
@@ -114,7 +114,7 @@ def check_keys(obj):
 
 CONFIG_SCHEMA = cv.All(
     sensor.sensor_schema(
-        VL53L1Sensor,
+        VL53L1xSensor,
         unit_of_measurement=UNIT_METER,
         icon=ICON_ARROW_EXPAND_VERTICAL,
         accuracy_decimals=3,
