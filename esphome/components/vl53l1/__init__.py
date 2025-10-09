@@ -1,3 +1,0 @@
-CODEOWNERS = ["@stian-svedenborg"]
-
-
