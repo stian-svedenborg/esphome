@@ -142,6 +142,13 @@ void VL53L1Sensor::loop() {
   this->set_timeout("clear_measurement", 2*this->update_interval_ms_, [this](){
     this->publish_state(NAN);
   });
+
+   if (this->interrupt_pin_ != nullptr) {
+    VL53L1X_ERROR err = 0;
+    if ((err = VL53L1X_ClearInterrupt(this->address_)) != VL53L1X_ERROR_NONE) {
+      ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
+    } 
+  }
 }
 
 void VL53L1Sensor::dump_config() {
@@ -193,13 +200,6 @@ RetryResult VL53L1Sensor::update() {
 
   uint16_t distance_mm = 0;
   ReadResult readResult = this->read_distance_mm_(distance_mm);
-
-  if (this->interrupt_pin_ != nullptr) {
-    VL53L1X_ERROR err = 0;
-    if ((err = VL53L1X_ClearInterrupt(this->address_)) != VL53L1X_ERROR_NONE) {
-      ESP_LOGW(TAG, "ClearInterrupt failed %d", err);
-    } 
-  }
   
   if (readResult == ReadResult::FAILURE) {
     this->publish_state(NAN);

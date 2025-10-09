@@ -90,6 +90,9 @@ def check_keys(obj):
             raise cv.Invalid(msg)
     
     if CONF_DISTANCE_THRESHOLD in obj:
+        if CONF_INTERRUPT_PIN not in obj:
+            raise cv.Invalid("'distance threshold' is only supported in interrupt mode. Configure 'interrupt_pin' to enable interrupt mode.")
+
         threshold_obj = obj[CONF_DISTANCE_THRESHOLD]
         if CONF_MIN in threshold_obj and CONF_MAX in threshold_obj:
             if to_uint16_mm(threshold_obj[CONF_MIN]) >= to_uint16_mm(threshold_obj[CONF_MAX]):
