@@ -384,7 +384,7 @@ bool VL53L1Sensor::apply_roi() {
     uint8_t err = 0;
 
     uint8_t center_x = this->roi.x + this->roi.w/2;
-    uint8_t center_y = 16-(this->roi.y + this->roi.h/2);
+    uint8_t center_y = 15-(this->roi.y + this->roi.h/2);
 
     // Before config:
     uint16_t w, h; 
