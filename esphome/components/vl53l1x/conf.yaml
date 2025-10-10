@@ -7,13 +7,17 @@ sensor:
   - platform: vl53l1x
     name: "All Configuration Options"
 
-    # Conditionally required: Must be set when multiple VL53L1X Sensors are connected on the same bus.
+    # Conditionally required: Must be set when multiple VL53L1X Sensors 
+    # are connected. All sensors must have a unique address, even when
+    # connected to multiple buses.
     address: 0x29 # Default: 0x29
 
-    # Conditionally required: Must be set if address is not 0x29 or there are multiple VL53L1X Sensors connected on the same bus.
+    # Conditionally required: Must be set if address is not 
+    # 0x29 or there are multiple VL53L1X Sensors connected on the same bus.
     enable_pin: GPIOXX
 
-    # Optional: If set, the sensor will operate in interrupt mode, if not set, it will operate in polling mode.
+    # Optional: If set, the sensor will operate in interrupt mode, 
+    # if not set, it will operate in polling mode.
     interrupt_pin: GPIOXX
     
     # Optional: How often the sensor will update its value.

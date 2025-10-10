@@ -18,6 +18,8 @@
 #ifndef _API_H_
 #define _API_H_
 
+
+
 #include "vl53l1_platform.h"
 
 namespace esphome {
@@ -82,6 +84,8 @@ typedef uint8_t VL53L1X_ERROR;
  * PRIVATE define do not edit
  ****************************************/
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
+
 /**
  *  @brief defines SW Version
  */
@@ -107,6 +111,7 @@ typedef struct {
  * @brief This function returns the SW driver version
  */
 VL53L1X_ERROR VL53L1X_GetSWVersion(VL53L1X_Version_t *pVersion);
+#endif
 
 /**
  * @brief This function sets the sensor I2C address used in case multiple devices application, default address 0x52
@@ -132,12 +137,13 @@ VL53L1X_ERROR VL53L1X_ClearInterrupt(uint16_t dev);
  */
 VL53L1X_ERROR VL53L1X_SetInterruptPolarity(uint16_t dev, uint8_t IntPol);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current interrupt polarity\n
  * 1=active high (default), 0=active low
  */
 VL53L1X_ERROR VL53L1X_GetInterruptPolarity(uint16_t dev, uint8_t *pIntPol);
-
+#endif
 /**
  * @brief This function starts the ranging distance operation\n
  * The ranging operation is continuous. The clear interrupt has to be done after each get data to allow the interrupt to raise when the next data is ready\n
@@ -162,10 +168,12 @@ VL53L1X_ERROR VL53L1X_CheckForDataReady(uint16_t dev, uint8_t *isDataReady);
  */
 VL53L1X_ERROR VL53L1X_SetTimingBudgetInMs(uint16_t dev, uint16_t TimingBudgetInMs);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current timing budget in ms.
  */
 VL53L1X_ERROR VL53L1X_GetTimingBudgetInMs(uint16_t dev, uint16_t *pTimingBudgetInMs);
+#endif
 
 /**
  * @brief This function programs the distance mode (1=short, 2=long(default)).
@@ -174,10 +182,12 @@ VL53L1X_ERROR VL53L1X_GetTimingBudgetInMs(uint16_t dev, uint16_t *pTimingBudgetI
  */
 VL53L1X_ERROR VL53L1X_SetDistanceMode(uint16_t dev, uint16_t DistanceMode);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current distance mode (1=short, 2=long).
  */
 VL53L1X_ERROR VL53L1X_GetDistanceMode(uint16_t dev, uint16_t *pDistanceMode);
+#endif
 
 /**
  * @brief This function programs the Intermeasurement period in ms\n
@@ -187,26 +197,31 @@ VL53L1X_ERROR VL53L1X_GetDistanceMode(uint16_t dev, uint16_t *pDistanceMode);
 VL53L1X_ERROR VL53L1X_SetInterMeasurementInMs(uint16_t dev,
 					 uint32_t InterMeasurementInMs);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the Intermeasurement period in ms.
  */
 VL53L1X_ERROR VL53L1X_GetInterMeasurementInMs(uint16_t dev, uint16_t * pIM);
+#endif
 
 /**
  * @brief This function returns the boot state of the device (1:booted, 0:not booted)
  */
 VL53L1X_ERROR VL53L1X_BootState(uint16_t dev, uint8_t *state);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the sensor id, sensor Id must be 0xEEAC
  */
 VL53L1X_ERROR VL53L1X_GetSensorId(uint16_t dev, uint16_t *id);
+#endif
 
 /**
  * @brief This function returns the distance measured by the sensor in mm
  */
 VL53L1X_ERROR VL53L1X_GetDistance(uint16_t dev, uint16_t *distance);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the returned signal per SPAD in kcps/SPAD.
  * With kcps stands for Kilo Count Per Second
@@ -232,17 +247,19 @@ VL53L1X_ERROR VL53L1X_GetSpadNb(uint16_t dev, uint16_t *spNb);
  * @brief This function returns the ambient rate in kcps
  */
 VL53L1X_ERROR VL53L1X_GetAmbientRate(uint16_t dev, uint16_t *ambRate);
-
+#endif
 /**
  * @brief This function returns the ranging status error \n
  * (0:no error, 1:sigma failed, 2:signal failed, ..., 7:wrap-around)
  */
 VL53L1X_ERROR VL53L1X_GetRangeStatus(uint16_t dev, uint8_t *rangeStatus);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns measurements and the range status in a single read access
  */
 VL53L1X_ERROR VL53L1X_GetResult(uint16_t dev, VL53L1X_Result_t *pResult);
+#endif
 
 /**
  * @brief This function programs the offset correction in mm
@@ -250,10 +267,12 @@ VL53L1X_ERROR VL53L1X_GetResult(uint16_t dev, VL53L1X_Result_t *pResult);
  */
 VL53L1X_ERROR VL53L1X_SetOffset(uint16_t dev, int16_t OffsetValue);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the programmed offset correction value in mm
  */
 VL53L1X_ERROR VL53L1X_GetOffset(uint16_t dev, int16_t *Offset);
+#endif
 
 /**
  * @brief This function programs the xtalk correction value in cps (Count Per Second).\n
@@ -261,10 +280,12 @@ VL53L1X_ERROR VL53L1X_GetOffset(uint16_t dev, int16_t *Offset);
  */
 VL53L1X_ERROR VL53L1X_SetXtalk(uint16_t dev, uint16_t XtalkValue);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current programmed xtalk correction value in cps
  */
 VL53L1X_ERROR VL53L1X_GetXtalk(uint16_t dev, uint16_t *Xtalk);
+#endif
 
 /**
  * @brief This function programs the threshold detection mode\n
@@ -283,6 +304,7 @@ VL53L1X_ERROR VL53L1X_SetDistanceThreshold(uint16_t dev, uint16_t ThreshLow,
 			      uint16_t ThreshHigh, uint8_t Window,
 			      uint8_t IntOnNoTarget);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS				  
 /**
  * @brief This function returns the window detection mode (0=below; 1=above; 2=out; 3=in)
  */
@@ -298,6 +320,8 @@ VL53L1X_ERROR VL53L1X_GetDistanceThresholdLow(uint16_t dev, uint16_t *low);
  */
 VL53L1X_ERROR VL53L1X_GetDistanceThresholdHigh(uint16_t dev, uint16_t *high);
 
+#endif
+
 /**
  * @brief This function programs the ROI (Region of Interest)\n
  * The ROI position is centered, only the ROI size can be reprogrammed.\n
@@ -306,10 +330,13 @@ VL53L1X_ERROR VL53L1X_GetDistanceThresholdHigh(uint16_t dev, uint16_t *high);
  */
 VL53L1X_ERROR VL53L1X_SetROI(uint16_t dev, uint16_t X, uint16_t Y);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  *@brief This function returns width X and height Y
  */
 VL53L1X_ERROR VL53L1X_GetROI_XY(uint16_t dev, uint16_t *ROI_X, uint16_t *ROI_Y);
+
+#endif
 
 /**
  *@brief This function programs the new user ROI center, please to be aware that there is no check in this function.
@@ -317,30 +344,38 @@ VL53L1X_ERROR VL53L1X_GetROI_XY(uint16_t dev, uint16_t *ROI_X, uint16_t *ROI_Y);
  */
 VL53L1X_ERROR VL53L1X_SetROICenter(uint16_t dev, uint8_t ROICenter);
 
+
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  *@brief This function returns the current user ROI center
  */
 VL53L1X_ERROR VL53L1X_GetROICenter(uint16_t dev, uint8_t *ROICenter);
+#endif
+
 
 /**
  * @brief This function programs a new signal threshold in kcps (default=1024 kcps\n
  */
 VL53L1X_ERROR VL53L1X_SetSignalThreshold(uint16_t dev, uint16_t signal);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current signal threshold in kcps
  */
 VL53L1X_ERROR VL53L1X_GetSignalThreshold(uint16_t dev, uint16_t *signal);
+#endif
 
 /**
  * @brief This function programs a new sigma threshold in mm (default=15 mm)
  */
 VL53L1X_ERROR VL53L1X_SetSigmaThreshold(uint16_t dev, uint16_t sigma);
 
+#ifdef VL53L1X_INCLUDE_READ_FUNCTIONS
 /**
  * @brief This function returns the current sigma threshold in mm
  */
 VL53L1X_ERROR VL53L1X_GetSigmaThreshold(uint16_t dev, uint16_t *signal);
+#endif 
 
 /**
  * @brief This function performs the temperature calibration.
